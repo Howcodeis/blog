@@ -14,11 +14,8 @@ const playChoose = (row) => musicStatus().setMusicInfo(row)
 </script>
 
 <template>
-  <el-table :data="getPlayList" stripe max-height="700" lazy style="width: 100%" @row-dblclick="playChoose">
-    <el-table-column fixed width="20" label="#">
-      <template #default="scope">
-      </template>
-    </el-table-column>
+  <el-table :data="getPlayList" stripe max-height="900" lazy style="width: 100%" @row-dblclick="playChoose">
+    <!-- <el-table-column fixed width="20" label="#" /> -->
     <el-table-column label="歌曲" min-width="150">
       <template #default="scope">
         <div class="text-style text-[16px] text-black"><span>{{ scope.row.name }}</span></div>

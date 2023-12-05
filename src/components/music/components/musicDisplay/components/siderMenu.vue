@@ -8,13 +8,14 @@ defineComponent({
 
 const titles = reactive({
   playList: 'playList',
-  foundMusic: 'foundMusic'
+  foundMusic: 'foundMusic',
+  home: 'home'
 })
-const { playList, foundMusic } = toRefs(titles)
+const { playList, foundMusic, home } = toRefs(titles)
 </script>
 
 <template>
-  <ul class="flex flex-col items-center justify-start h-full text-center leading-10">
+  <ul class="flex flex-col items-center justify-start h-full text-center leading-10 overflow-scroll">
     <li class="li-style hover:bg-cyan-800 mt-8">
       <routeComp :title="playList" />
     </li>
@@ -22,7 +23,7 @@ const { playList, foundMusic } = toRefs(titles)
       <routeComp :title="foundMusic" />
     </li>
     <li class="li-style hover:bg-cyan-800">
-      <routeComp />
+      <routeComp :title="home" />
     </li>
     <li class="li-style hover:bg-cyan-800">
       <routeComp />

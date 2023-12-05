@@ -1,29 +1,86 @@
 <script setup>
-import { defineComponent, onMounted, ref, toRef } from 'vue';
-import { musicStatus } from '../../store';
+import { defineComponent, onMounted, ref } from 'vue';
 import controls from './components/controls.vue';
 import musicDisplay from './components/musicDisplay/musicDisplay.vue'
 import siderMenu from './components/musicDisplay/components/siderMenu.vue';
+import soloPage from './components/soloPage.vue'
 import gsap from 'gsap';
+import { musicStatus } from '../../store';
+import { storeToRefs } from 'pinia';
+
+const { isShowLyricBoard } = storeToRefs(musicStatus())
 
 defineComponent({
   name: 'MusicPage'
 })
 
-const musicBox = ref(null)
 const isShowSiderMenu = ref(false)
 const showSiderMenu = () => {
   isShowSiderMenu.value = !isShowSiderMenu.value
 }
 
+const musicBox = ref(null)
+const beforeEnter = (el) => {
+  gsap.set(el, {
+    autoAlpha: 0,
+    x: -100,
+  })
+}
+const enter = (el, done) => {
+  gsap.to(el, {
+    duration: 0.5,
+    autoAlpha: 1,
+    x: 0,
+    onComplete: done
+  })
+}
+const leave = (el, done) => {
+  gsap.to(el, {
+    duration: 0.5,
+    x: -100,
+    autoAlpha: 0,
+    onComplete: done
+  })
+}
+const soloItem = ref(null)
+const timeline = gsap.timeline()
+const toggleLyricBoard = () => {
+  if (!isShowLyricBoard.value) {
+    timeline.to(musicBox.value, {
+      duration: 0.5,
+      autoAlpha: 0,
+      y: 100,
+      onComplete: () => {
+        isShowLyricBoard.value = true
+      }
+    })
+    timeline.to(soloItem.value, {
+      duration: 0.5,
+      autoAlpha: 1,
+      y: 0,
+    })
+  } else {
+    timeline.to(soloItem.value, {
+      duration: 0.5,
+      autoAlpha: 0,
+      y: 100,
+      onComplete: () => {
+        isShowLyricBoard.value = false
+      }
+    })
+    timeline.to(musicBox.value, {
+      duration: 0.5,
+      autoAlpha: 1,
+      y: 0,
+    })
+  }
+}
 onMounted(() => {
-  musicStatus().initAudio()
-  gsap.from(musicBox.value.children, {
-    delay: 0.5,
+  gsap.from(musicBox.value, {
+    delay: 0.2,
     duration: 1,
     y: 100,
     autoAlpha: 0,
-    stagger: 0.25,
     ease: 'back.out(1)'
   })
 
@@ -31,29 +88,47 @@ onMounted(() => {
 </script>
 
 <template>
-  <div ref="musicBox" class="music-box box-border absolute w-full h-5/6 bottom-0 right-0">
+  <!-- 整个音乐界面 -->
+  <div v-show="!isShowLyricBoard" ref="musicBox" class="music-box box-border absolute w-full h-5/6 bottom-0 right-0">
     <!-- 音乐展示界面 -->
-    <div class='text-white absolute rounded-l w-[10%] h-full max-md:hidden max-lg:w-[15%] bg-gradient-to-t from-slate-900 via-slate-800 to-cyan-800'>
+    <div
+      class='text-white absolute rounded-l w-[10%] h-full max-md:hidden max-lg:w-[15%] bg-gradient-to-t from-slate-900 via-slate-800 to-cyan-800'>
       <siderMenu />
     </div>
-    <div class="absolute w-[90%] h-full top-0 right-0 rounded-r flex flex-col max-lg:w-[85%] max-md:w-full bg-gradient-to-t from-slate-900 via-slate-800 to-cyan-900">
+    <div class="absolute w-[90%] h-full top-0 right-0 rounded-r flex flex-col max-lg:w-[85%] max-md:w-full ">
       <!-- 音乐列表 -->
       <div class='absolute rounded-lg right-0 w-full h-[90%] max-md:w-full max-md:h-[90%]'>
-        <div class="md:hidden absolute top-[1.25rem] w-9 h-9 z-20">
-          <i class="iconfont icon-caidan1" @click="showSiderMenu" v-show="!isShowSiderMenu"></i>
-        </div>
-        <musicDisplay />
+        <musicDisplay :showSiderMenu="showSiderMenu" />
       </div>
       <!-- 控制栏 -->
       <div
         class="text-white bg-slate-900 z-20 select-none rounded-md absolute right-0 bottom-0 h-[10%] flex justify-between min-h-[5.5rem] w-full max-md:h-[10%]">
-        <controls />
+        <controls :toggleLyricBoard="toggleLyricBoard" />
       </div>
     </div>
   </div>
-  <div class="md:hidden absolute bottom-0 left-0 z-30 w-[30%] h-5/6" v-show="isShowSiderMenu">
-    <i class="iconfont icon-caidan1 block my-[1.25rem]" @click="showSiderMenu" />
-    <siderMenu />
+  <!-- 这是小屏幕菜单显示 -->
+  <transition @before-enter="beforeEnter" @enter="enter" @leave="leave">
+    <div
+      class="md:hidden box-border absolute w-full h-5/6 bottom-0 right-0 before:h-full before:absolute before:w-full before:content-[''] before:backdrop-blur-[1px] before:left-0 before:top-0 overflow-hidden"
+      v-show="isShowSiderMenu">
+      <div class="sider h-[4rem]">
+        <i class="iconfont icon-caidan1 absolute  top-[1.25rem]" @click="showSiderMenu" />
+      </div>
+      <div class="sider h-full">
+        <siderMenu />
+      </div>
+      <div class="absolute right-0 top-0 w-[70%] h-full" @click="showSiderMenu"></div>
+    </div>
+  </transition>
+  <!-- 主奏页面 -->
+  <div ref="soloItem" class="absolute w-full h-5/6 bottom-0" v-show="isShowLyricBoard">
+    <!-- 切换按钮 -->
+    <div @click="toggleLyricBoard"
+      class='absolute top-0 left-0 w-9 h-9 text-center text-slate-300 leading-8 z-20 hover:translate-y-2 duration-500'>
+      <i class="iconfont icon-xiangxiajiantou " />
+    </div>
+    <soloPage></soloPage>
   </div>
 </template>
 
@@ -65,5 +140,9 @@ onMounted(() => {
 
 .iconfont {
   @apply text-3xl cursor-pointer
+}
+
+.sider {
+  @apply text-white w-[30%] bg-slate-900 relative
 }
 </style>

@@ -141,7 +141,7 @@ export const getSongLyric = async (id) => {
         time = words[0].substring(1).split(':'),
         Ftime = +time[0] * 60 + +time[1],
         wordsObj = {
-          time: Ftime,
+          time: Math.floor(Ftime * 100) / 100,
           word: words[1]
         }
       LyricList.push(wordsObj)

@@ -118,8 +118,8 @@ export const musicStatus = defineStore('music', {
         if (audio.ended) this.playNext(true)
         audio.volume = this.getVolume
         // 查找播放歌词
-        let index = this.currentMusicInfo.lyric.findIndex(lrc => lrc.time > audio.currentTime)
-        this.currentLyricIndex = index - 1
+        let index = this.currentMusicInfo.lyric.findIndex(lrc => lrc.time >= audio.currentTime)
+        this.currentLyricIndex = index - 1 < -1 ? this.currentMusicInfo.lyric.length - 2 : index - 1
       }
     },
     // 上下首播放设置
@@ -208,12 +208,6 @@ export const musicStatus = defineStore('music', {
         })
       }
     },
-    // 设置音乐音量大小
-    setVolume (value) {
-      audio.volume = value
-      this.volume = audio.volume
-    },
-
     // 点击歌词跳转
     skipByLyric (lyric) {
       audio.currentTime = lyric.time
@@ -253,7 +247,7 @@ export const musicStatus = defineStore('music', {
     stepOpenVolume () {
       if (closeBeforeVolume.value == 0) this.volume = 0.5
       else this.volume = closeBeforeVolume.value
-    }
+    },
   },
 
   persist: {

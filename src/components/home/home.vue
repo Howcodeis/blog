@@ -1,7 +1,5 @@
 <script setup>
-import gsap from 'gsap'
-import { defineComponent, onMounted, ref } from 'vue';
-import music from '../music/music.vue';
+import { defineComponent } from 'vue';
 
 defineComponent({
   name: 'Home'
@@ -12,11 +10,11 @@ defineComponent({
   <div class="container">
     <div class="header"></div>
     <div class="content">
-      <router-link :to="{ name: 'music' }">How beautiful the music is auh!</router-link>
-      <!-- <music></music> -->
-      <keep-alive>
-        <router-view></router-view>
-      </keep-alive>
+      <router-view v-slot="{ Component }">
+        <keep-alive>
+          <component :is="Component" />
+        </keep-alive>
+      </router-view>
     </div>
     <div class="footer"></div>
   </div>

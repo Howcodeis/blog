@@ -19,6 +19,7 @@ const routes = [
   {
     path: '/music',
     name: 'music',
+    redirect: "/music/playList",
     meta: {
       menu: '音乐'
     },
