@@ -39,6 +39,7 @@ export function normalBack (type, message) {
  * @param {string} message 
  * @param {string} type 
  * @param {number} offset 
+ * returns element-ui-Notification
  */
 export function notificationBack (title, message, type, offset) {
   return ElNotification({

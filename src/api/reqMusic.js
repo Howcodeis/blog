@@ -9,13 +9,12 @@ import http from "../utils/axiosInterceptors";
 
 /**
    * 搜索歌曲
-   * @param {object} keyword 
+   * @param {string} keyword 
    * @returns music-list
    */
-export function reqMusicList (keyword) {
-  return new Promise((resolve, reject) => {
-    http.get(`/search?keywords=${keyword}`).then(res => { resolve(res) }).catch(err => reject(err))
-  })
+export const reqMusicList = async (keywords, limit, offset) => {
+  const url = `/search?keywords=${keywords}&limit=${limit}&offset=${offset}`;
+  return await http.get(url)
 }
 
 /**
@@ -23,21 +22,19 @@ export function reqMusicList (keyword) {
  * @param {number} id 
  * @returns music-url
  */
-export function reqSongUrl (id) {
-  return new Promise((resolve, reject) => {
-    http.get(`/song/url/v1?id=${id}&level=exhigh`).then(res => resolve(res)).catch(err => reject(err))
-  })
-}
+export const reqSongUrl = async id => {
+  const url = `/song/url/v1?id=${id}&level=exhigh`;
+  return await http.get(url);
+};
 
 /**
  * 获取歌曲歌词
  * @param {number} id 
  * @returns music-lyric
  */
-export function reqSongLyric (id) {
-  return new Promise((resolve, reject) => {
-    http.get(`/lyric?id=${id}`).then(res => resolve(res)).catch(err => reject(err))
-  })
+export const reqSongLyric = async id => {
+  const url = `/lyric?id=${id}`;
+  return await http.get(url)
 
 }
 
@@ -47,8 +44,7 @@ export function reqSongLyric (id) {
  * @param {number} id 
  * @returns music-imageUrl
  */
-export function reqSongDetail (id) {
-  return new Promise((resolve, reject) => {
-    http.get(`/song/detail?ids=${id}`).then(res => resolve(res)).catch(err => reject(err))
-  })
+export const reqSongDetail = async id => {
+  const url = `/song/detail?ids=${id}`;
+  return await http.get(url)
 }

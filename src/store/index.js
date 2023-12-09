@@ -15,14 +15,15 @@ import {
   PercentageOfProgress,
 } from "../components/music/musicTools"
 import { ref } from "vue"
+import { normalBack } from "../utils/MessageBack"
 
 const audio = new Audio()
 const closeBeforeVolume = ref(0)
 
 export const musicStatus = defineStore('music', {
-
   // readAndWrite
   state: () => ({
+    keywords: '', // 搜索
     playType: PLAYTYPE.SEARCH,// 播放列表
     playMode: PLAYMODEL[0],// 播放顺序
     currentMusic: '', // 当前歌曲
@@ -34,7 +35,7 @@ export const musicStatus = defineStore('music', {
     duration: 0, // 歌曲总时长
     volume: 0.5, // 初始播放音量
     isPlay: false, // 是否播放
-    isShowLyricBoard: false,
+    isShowLyricBoard: false,// 是否展示歌曲界面
     isTouch: false, // 是否拖动进度条
     currentMusicInfo: {
       name: '',// 当前歌曲名
@@ -44,11 +45,17 @@ export const musicStatus = defineStore('music', {
       lyric: [], // 歌词
       artist: '', //艺人
       album: '' //专辑
+    },
+    searchSettngs: {
+      limit: 30,
+      offset: 0,
     }
   }),
-
   // readOnly
   getters: {
+    getKeywords () {
+      return this.keywords
+    },
     getPlayType () {
       return this.playType
     },
@@ -88,36 +95,46 @@ export const musicStatus = defineStore('music', {
     getCurrentMusicInfo () {
       return this.currentMusicInfo
     },
-
+    getSearchSettings () {
+      return this.searchSettngs
+    },
   },
-
   // hooks
   actions: {
     // 初始化音乐
     initAudio () {
       audio.preload = true
       audio.loop = false
-      // audio.autoplay = true
+      audio.autoplay = true
       audio.volume = this.volume
       this.isPlay = false
 
       if (this.currentMusic) this.duration = this.currentMusic.duration / 1000
+      // 开发阶段需要加上
       if (this.currentMusicInfo.url) audio.src = this.currentMusicInfo.url
+      // 开发阶段先注释掉，以免频繁刷新页面导致被墙
       // if (this.currentMusic) this.setMusicInfo(this.currentMusic, true)
-
+      // 这里由于是开发阶段，所以需要结合上面代码加上audio.src
       if (this.currentMusic && audio.src) audio.currentTime = this.currentTime
 
       // 音乐播放时更新对应状态
       audio.ontimeupdate = () => {
+        // 更新音量
+        audio.volume = this.getVolume
+        // 更新播放状态需要配合autoplay使用
         if (!audio.paused) this.isPlay = !audio.paused
+        // 如果没有触摸进度条，则更新进度条和播放时间
         if (!this.isTouch) {
+          // 计算音频的百分比进度
           this.audioSchedule = PercentageOfProgress(audio.currentTime, audio.duration)
+          // 更新当前时间
           this.currentTime = audio.currentTime
         }
+        // 更新总时长
         if (this.duration != audio.duration && audio.duration) this.duration = audio.duration
+        // 播放结束，处理下一首
         if (audio.ended) this.playNext(true)
-        audio.volume = this.getVolume
-        // 查找播放歌词
+        // 处理歌词索引
         let index = this.currentMusicInfo.lyric.findIndex(lrc => lrc.time >= audio.currentTime)
         this.currentLyricIndex = index - 1 < -1 ? this.currentMusicInfo.lyric.length - 2 : index - 1
       }
@@ -138,21 +155,20 @@ export const musicStatus = defineStore('music', {
       // 交给音乐工具处理
       const nextIndex = getNextSong(len, index, this.playMode, data)
       // 得到的下一首歌曲索引交给播放函数处理
-      this.setMusicInfo(tempList[nextIndex])
+      if (index == -1 && nextIndex == -1) this.setMusicInfo(this.currentMusic)
+      else this.setMusicInfo(tempList[nextIndex])
     },
     // 获取歌曲信息 准备播放
     async setMusicInfo (music, B = false) {
       if (!music) return
-      let res = null
-      let musicUrl = null
-      let lyricList = null
+      let res, musicUrl, lyricList
       try {
         res = await getSongDetails(music.id)
         musicUrl = await getSongUrl(music.id)
         lyricList = await getSongLyric(music.id)
       } catch (error) {
         this.isPlay = false
-        console.log(error);
+        normalBack('warning', error)
         return
       }
       this.currentMusic = music
@@ -168,12 +184,37 @@ export const musicStatus = defineStore('music', {
       audio.src = musicUrl.url
       this.setPlay(B)
     },
-
+    // 重置搜索设置
+    resetSearch () {
+      this.searchSettngs = {
+        limit: 30,
+        offset: 0,
+      }
+    },
     // 搜索歌曲设置
-    async setMusicList (value) {
-      if (!value) { console.log('erro'); return }
-      const res = await getMusicList(value)
-      this.playList = res
+    async setMusicList (keywords) {
+      if (!keywords) return
+      //重置搜索设置
+      this.resetSearch()
+      try {
+        const res = await getMusicList(keywords, this.searchSettngs.limit, this.searchSettngs.offset)
+        this.keywords = keywords
+        this.playList = res
+      } catch (error) {
+        normalBack('warning', error)
+      }
+    },
+    // 触底加载
+    async loadMore () {
+      if (!this.keywords) return
+      this.searchSettngs.offset += 30
+      try {
+        const res = await getMusicList(this.keywords, this.searchSettngs.limit, this.searchSettngs.offset)
+        this.playList = this.playList.concat(res)
+      } catch (error) {
+        this.resetSearch()
+        normalBack('warning', error)
+      }
     },
     // 播放设置
     setPlay (B = false) {
@@ -203,17 +244,16 @@ export const musicStatus = defineStore('music', {
         audio.pause()
         this.isPlay = false
       } else {
-        audio.play().then(() => {
-          this.isPlay = true
-        })
+        audio.play()
+          .then(() => { this.isPlay = true })
+          .catch(() => { this.isPlay = false })
       }
     },
     // 点击歌词跳转
-    skipByLyric (lyric) {
-      audio.currentTime = lyric.time
+    skipByLyric (time) {
+      audio.currentTime = time
       this.currentTime = audio.currentTime
     },
-
     // 进度条拖动
     setProgress () {
       if (this.currentMusic) {
@@ -223,7 +263,6 @@ export const musicStatus = defineStore('music', {
         this.currentTime = 0
       }
     },
-
     // 拖动进度条完毕
     setProgressDone () {
       if (this.currentMusic) {
@@ -237,19 +276,18 @@ export const musicStatus = defineStore('music', {
       if (audio.duration) return Math.floor((audio.duration * (value / 100)))
       else return Math.floor((this.duration * (value / 100)))
     },
-
-
+    // 音量控制 关闭
     stepCloseVolume () {
       closeBeforeVolume.value = this.volume
       this.volume = 0
     },
-
+    // 音量控制 打开
     stepOpenVolume () {
       if (closeBeforeVolume.value == 0) this.volume = 0.5
       else this.volume = closeBeforeVolume.value
     },
   },
-
+  // 持久化存储
   persist: {
     storage: localStorage
   }

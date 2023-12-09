@@ -5,7 +5,6 @@
  */
 import axios from "axios";
 import nProgress from 'nprogress'
-import { normalBack } from "./MessageBack";
 
 const http = axios.create({
   baseURL: '/api/',
@@ -34,8 +33,7 @@ http.interceptors.response.use(
   },
   error => {
     nProgress.done()
-    normalBack('warning', "网络异常")
-    return Promise.reject(error)
+    return error
   }
 )
 

@@ -11,6 +11,7 @@ import { createPinia } from 'pinia'
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 import router from './router'
 import ElementPlus from 'element-plus'
+import ElTableInfiniteScroll from 'el-table-infinite-scroll'
 import 'element-plus/dist/index.css'
 import './assets/index.css'
 import './assets/iconfont.css'
@@ -23,4 +24,5 @@ createApp(App)
   .use(pinia)
   .use(router)
   .use(ElementPlus)
+  .use(ElTableInfiniteScroll)
   .mount('#app')

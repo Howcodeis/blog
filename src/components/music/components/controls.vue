@@ -19,12 +19,14 @@ defineProps({
 </script>
 
 <template>
-  <!-- 控制栏 -->
-  <div class="song-img relative flex flex-[2] max-md:flex-[1.5] max-md:min-w-[13rem]">
-    <div class="img-set relative" @click="toggleLyricBoard">
-      <img class="rounded max-w-full max-h-full min-w-[5.5rem] cursor-pointer" :src="currentMusicInfo.cover || '默认图片路劲'">
+  <!-- 歌曲图片信息 -->
+  <div class="relative flex flex-[2] max-md:flex-[1] max-md:min-w-[12rem]">
+    <!-- 图片 -->
+    <div class="relative h-full min-w-[6.5rem] max-w-[6.5rem]" @click="toggleLyricBoard">
+      <img class="rounded min-w-full min-h-full cursor-pointer" :src="currentMusicInfo.cover || '默认图片路劲'">
     </div>
-    <div class="song-name overflow-hidden mt-2 pl-5 max-md:text-[0.8rem] max-md:pl-1">
+    <!-- 歌手 -->
+    <div class="relative overflow-hidden pt-2 pl-5 max-md:text-[0.8rem] duration-300 max-md:pl-1">
       <div class="name-space text-ellipsis whitespace-nowrap overflow-x-hidden" :title="currentMusicInfo.name">
         <span>{{ currentMusic.name || '暂无歌曲' }}</span>
       </div>
@@ -33,9 +35,10 @@ defineProps({
       </div>
     </div>
   </div>
-  <div class="progress-control w-3/5 flex justify-center flex-col flex-[3] max-md:flex-[3]">
+  <!-- 控制栏 -->
+  <div class="w-3/5 flex justify-center flex-col flex-[3]">
     <!-- 播放顺序 和音量-->
-    <div class="song-control flex flex-[2] justify-center max-md:flex-[3]">
+    <div class="flex flex-[2] justify-center max-md:flex-[3]">
       <div class="flex items-center relative">
         <i class="iconfont icon-suijibofang" v-show="playMode == PLAYMODEL[1]" @click="playMode = PLAYMODEL[0]"
           title="随机播放"> </i>
@@ -55,38 +58,32 @@ defineProps({
         <i class="iconfont icon-yinliang" v-show="volume != 0" @click="musicStatus().stepCloseVolume"></i>
         <i class="iconfont icon-guanbiyinliang" v-show="volume == 0" @click="musicStatus().stepOpenVolume"></i>
         <div class="left-9 absolute w-[6rem]">
-          <el-slider v-show="isShowVolume" :max="1" :step="0.01" v-model="volume"></el-slider>
+          <el-slider v-show="isShowVolume" :max="1" :step="0.01" :show-tooltip="false" v-model="volume"></el-slider>
         </div>
-        <!-- <div class="md:hidden absolute h-[4rem] top-[-3.8rem] left-[-0.3rem]">
-          <el-slider class="verticalVolumeControl" vertical v-show="isShowVolume" :max="1" :step="0.01"
-            :show-tooltip="false" v-model="volume"></el-slider>
-        </div> -->
       </div>
     </div>
     <!-- 进度条 盒子-->
-    <div class="progress-bar flex justify-center items-center flex-1 max-md:flex-[1]">
+    <div class="flex justify-center items-center flex-1 max-md:flex-[1]">
       <!-- 进度条 -->
-      <div class="music-bar w-full  flex justify-center items-center">
-        <div class="max-md:text-xs flex-1 text-right"><span>{{ timeFormat(currentTime) }}</span></div>
+      <div class="w-full flex justify-center items-center">
+        <div class="max-md:text-xs duration-300 flex-1 text-right"><span>{{ timeFormat(currentTime) }}</span></div>
         <el-slider class="mx-2 flex-[5]" v-model="musicStatus().audioSchedule" size="small" :show-tooltip="false"
           @change="musicStatus().setProgressDone" @input="musicStatus().setProgress" />
-        <div class="max-md:text-xs flex-1 "><span>{{ isString(timeFormat(duration)) ? timeFormat(duration) :
+        <div class="max-md:text-xs flex-1 duration-300"><span>{{ isString(timeFormat(duration)) ? timeFormat(duration) :
           "00:00" }}</span></div>
       </div>
     </div>
     <!-- 迷你歌词 -->
-    <div :class="[isShowLyricBoard ? 'small-lrc-change' : 'small-lrc']"
-      class="flex-[2] max-md:flex-[2] flex justify-center items-start">
+    <div class="flex-[2] max-md:flex-[2] flex justify-center items-start">
       <div ref="maxWidth"
         class="h-full leading-4 w-full text-center max-md:leading-5 max-md:h-full text-ellipsis whitespace-nowrap overflow-hidden">
-        <span class="word text-[0.8rem] max-md:text-[0.6rem]">
+        <span class="word text-[0.8rem] duration-300 max-md:text-[0.6rem]">
           {{ lyric()?.word ? lyric()?.word : '\xa0' }}
         </span>
       </div>
     </div>
   </div>
-  <div class="collect w-1/5 flex-[2] max-lg:hidden max-lg:flex-none">
-
+  <div class="w-1/5 flex-[2] max-lg:hidden max-lg:flex-none">
   </div>
 </template>
 
@@ -106,19 +103,8 @@ defineProps({
   height: .45rem;
 }
 
-.verticalVolumeControl :deep(.el-slider__button) {
-  border: none;
-  width: 0.4rem;
-  height: 0.4rem;
-}
-
-.img-set:hover .up-img {
-  transform: scale(1.2);
-  color: aliceblue;
-}
-
 .iconfont {
-  @apply text-2xl h-10 transition duration-300 ease-in-out cursor-pointer mx-[0.4rem] pt-[4px] hover:text-blue-600
+  @apply text-2xl h-10 duration-300 ease-in-out cursor-pointer mx-[0.4rem] pt-[4px] hover:text-blue-600
 }
 
 .iconfont:hover {

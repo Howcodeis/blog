@@ -38,11 +38,15 @@ const delay = (time) => {
 const leave = (time) => {
   return enterLeave(time)
 }
+// 使用TweenMax库的timeline方法创建一个时间线
+// 参数：timeline（时间线对象），el（需要动画的元素），disTime（离开时间）
 export function gsapTimeline (timeline, el, disTime) {
+  // 将元素渐入舞台，持续时间为enter(disTime)
   timeline.to(el, {
     duration: enter(disTime),
     autoAlpha: 1,
   })
+  // 将元素渐出舞台，持续时间为leave(disTime)，延迟时间为delay(disTime)
   timeline.to(el, {
     delay: delay(disTime),
     duration: leave(disTime),

@@ -4,7 +4,9 @@
  * @Description: 路由配置
  */
 
-
+import { musicStatus } from '../store'
+import { storeToRefs } from 'pinia'
+import { nextTick } from 'vue'
 import { createRouter, createWebHistory } from 'vue-router'
 
 const routes = [
@@ -45,14 +47,19 @@ const routes = [
   }
 ]
 
-
 const router = createRouter({
   history: createWebHistory(),
   routes
 })
-
 router.beforeEach((to, from) => {
-
+  if (to.name == "playList") {
+    if (musicStatus().playList.length > 60) {
+      nextTick(() => {
+        const { keywords } = storeToRefs(musicStatus())
+        musicStatus().setMusicList(keywords.value)
+      })
+    }
+  }
   return true
 })
 
