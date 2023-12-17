@@ -3,7 +3,7 @@ import { defineComponent, inject, onMounted, provide, ref } from 'vue';
 import controls from './components/controls.vue';
 import musicDisplay from './components/musicDisplay/musicDisplay.vue'
 import siderMenu from './components/musicDisplay/components/siderMenu.vue';
-import soloPage from './components/soloPage.vue'
+import soloPage from './components/lyricBoard/soloPage.vue';
 import gsap from 'gsap';
 import { musicStatus } from '../../store';
 import { storeToRefs } from 'pinia';

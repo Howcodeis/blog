@@ -1,5 +1,5 @@
 <script setup>
-import { defineComponent, onMounted, reactive, toRefs } from 'vue';
+import { defineComponent, reactive, toRefs } from 'vue';
 import routeComp from '@/layout/routeComp/routeComp.vue'
 
 defineComponent({
