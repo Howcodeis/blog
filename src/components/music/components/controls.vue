@@ -1,12 +1,12 @@
 <script setup>
-import { musicStatus } from '../../../store';
+import { musicStatus } from '@/store';
 import { storeToRefs } from 'pinia';
 import { timeFormat } from '../musicTools';
 import { defineComponent, ref } from 'vue';
 import { PLAYMODEL } from '../musicTools';
 import { isString } from 'lodash';
 
-const { getIsplay, isShowLyricBoard, volume, currentMusicInfo, playMode, currentMusic, currentLyricIndex, currentTime, duration } = storeToRefs(musicStatus())
+const { getIsplay, volume, currentMusicInfo, playMode, currentMusic, currentLyricIndex, currentTime, duration } = storeToRefs(musicStatus())
 // 获取当前歌词以及出现时间
 const lyric = () => currentMusicInfo.value.lyric[currentLyricIndex?.value]
 defineComponent({
@@ -57,7 +57,7 @@ defineProps({
         @mouseleave="isShowVolume = false" title="音量">
         <i class="iconfont icon-yinliang" v-show="volume != 0" @click="musicStatus().stepCloseVolume"></i>
         <i class="iconfont icon-guanbiyinliang" v-show="volume == 0" @click="musicStatus().stepOpenVolume"></i>
-        <div class="left-9 absolute w-[6rem]">
+        <div class="left-9 absolute max-lg:w-[4rem] w-[6rem]">
           <el-slider v-show="isShowVolume" :max="1" :step="0.01" :show-tooltip="false" v-model="volume"></el-slider>
         </div>
       </div>

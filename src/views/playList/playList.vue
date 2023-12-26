@@ -1,9 +1,9 @@
 <script setup>
 import { defineComponent, onMounted } from 'vue';
-import { musicStatus } from '../../store/index.js';
+import { musicStatus } from '@/store/index.js';
 import { storeToRefs } from 'pinia';
-import { timeFormat } from '../../components/music/musicTools.js';
-import { normalBack } from '../../utils/MessageBack';
+import { timeFormat } from '@/components/music/musicTools.js';
+import { normalBack } from '@/utils/MessageBack';
 
 defineComponent({
   name: "playList"

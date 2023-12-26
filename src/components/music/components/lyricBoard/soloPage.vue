@@ -1,9 +1,9 @@
 
 <script setup>
 import { storeToRefs } from 'pinia';
-import { musicStatus } from '../../../../store';
+import { musicStatus } from '@/store';
 import gsap from "gsap";
-import { gsapTimeline } from '../../../../utils/gsapTools'
+import { gsapTimeline } from '@/utils/gsapTools'
 import { onMounted, onUnmounted, ref, watch } from 'vue';
 import { PLAYMODEL } from '../../musicTools';
 import lyricPanel from './components/lyricPanel.vue'

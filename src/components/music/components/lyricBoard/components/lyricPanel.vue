@@ -1,13 +1,14 @@
+
 <script setup>
-import { musicStatus } from '../../../../../store';
+import { musicStatus } from '@/store';
 import { storeToRefs } from 'pinia';
-import { defineComponent, defineProps, ref, toRef, watch } from 'vue'
+import { defineComponent, ref, watch } from 'vue'
 
 defineComponent({
   name: 'LyricPanel'
 })
 
-const isShowLyricPanel = defineProps({
+const props = defineProps({
   isShowLyricPanel: {
     type: Boolean,
     default: false
@@ -36,8 +37,8 @@ const handleMove = () => {
 watch(getCurrentLyricIndex, () => {
   if (isLyricMove) lyricMove()
 })
-watch([getIsShowLyricBoard, isShowLyricPanel], () => {
-  if (getIsShowLyricBoard.value && isShowLyricPanel) {
+watch([getIsShowLyricBoard, props.isShowLyricPanel], () => {
+  if (getIsShowLyricBoard.value && props.isShowLyricPanel) {
     setTimeout(() => {
       lyricMove()
     }, 100);

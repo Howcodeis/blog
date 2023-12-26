@@ -4,7 +4,7 @@ import { defineComponent } from 'vue';
 defineComponent({
   name: "routeComp"
 })
-const { title } = defineProps({
+const props = defineProps({
   title: {
     type: String,
     default: 'playList'
@@ -13,7 +13,7 @@ const { title } = defineProps({
 </script>
 
 <template>
-  <router-link :to="{ name: title }">{{ title }}</router-link>
+  <router-link :to="{ name: props.title }">{{ props.title }}</router-link>
 </template>
 
 <style scoped></style>

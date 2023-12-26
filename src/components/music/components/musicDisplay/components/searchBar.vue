@@ -1,6 +1,6 @@
 <script setup>
-import { defineComponent, inject, ref, watch } from 'vue';
-import { musicStatus } from '../../../../../store';
+import { defineComponent, inject, ref } from 'vue';
+import { musicStatus } from '@/store';
 import { storeToRefs } from 'pinia';
 
 defineComponent({
