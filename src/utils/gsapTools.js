@@ -42,12 +42,17 @@ const leave = (time) => {
 // 参数：timeline（时间线对象），el（需要动画的元素），disTime（离开时间）
 export function gsapTimeline (timeline, el, disTime) {
   // 将元素渐入舞台，持续时间为enter(disTime)
-  timeline.to(el, {
+  timeline.fromTo(el, {
+    autoAlpha: 0,
+    yPercent: 30
+  }, {
     duration: enter(disTime),
     autoAlpha: 1,
+    yPercent: 0,
   })
   // 将元素渐出舞台，持续时间为leave(disTime)，延迟时间为delay(disTime)
   timeline.to(el, {
+    yPercent: -30,
     delay: delay(disTime),
     duration: leave(disTime),
     autoAlpha: 0,

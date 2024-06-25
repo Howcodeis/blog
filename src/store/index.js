@@ -14,7 +14,7 @@ import {
   getNextSong,
   PercentageOfProgress,
 } from "../components/music/musicTools"
-import { ref } from "vue"
+import { ref, watch } from "vue"
 import { normalBack } from "../utils/MessageBack"
 
 const audio = new Audio()
@@ -35,7 +35,8 @@ export const musicStatus = defineStore('music', {
     duration: 0, // 歌曲总时长
     volume: 0.5, // 初始播放音量
     isPlay: false, // 是否播放
-    isShowLyricBoard: false,// 是否展示歌曲界面
+    isShowLyricsPanel: false,// 是否展示歌曲界面
+    isShowSPLyricsPanel: false,// 是否展示歌词特殊界面
     isTouch: false, // 是否拖动进度条
     currentMusicInfo: {
       name: '',// 当前歌曲名
@@ -89,8 +90,11 @@ export const musicStatus = defineStore('music', {
     getIsplay () {
       return this.isPlay
     },
-    getIsShowLyricBoard () {
-      return this.isShowLyricBoard
+    getIsShowLyricsPanel () {
+      return this.isShowLyricsPanel
+    },
+    getIsShowSPLyricsPanel () {
+      return this.isShowSPLyricsPanel
     },
     getCurrentMusicInfo () {
       return this.currentMusicInfo
@@ -105,7 +109,7 @@ export const musicStatus = defineStore('music', {
     initAudio () {
       audio.preload = true
       audio.loop = false
-      audio.autoplay = true
+      // audio.autoplay = true
       audio.volume = this.volume
       this.isPlay = false
 
@@ -113,9 +117,9 @@ export const musicStatus = defineStore('music', {
       // 开发阶段需要加上
       if (this.currentMusicInfo.url) audio.src = this.currentMusicInfo.url
       // 开发阶段先注释掉，以免频繁刷新页面导致被墙
-      // if (this.currentMusic) this.setMusicInfo(this.currentMusic, true)
+      // if (this.currentMusic) this.setMusicInfo(this.currentMusic)
       // 这里由于是开发阶段，所以需要结合上面代码加上audio.src
-      if (this.currentMusic && audio.src) audio.currentTime = this.currentTime
+      // if (this.currentMusic && audio.src) audio.currentTime = this.currentTime
 
       // 音乐播放时更新对应状态
       audio.ontimeupdate = () => {
@@ -150,22 +154,26 @@ export const musicStatus = defineStore('music', {
           tempList = this.favorite
           break;
       }
-      let index = tempList.findIndex(item => item.id == this.currentMusicInfo.id)
-      let len = tempList.length
+      // 先判断当前播放模式 如果是单曲循环就没必要查下一首或者上一首
+      if (this.playMode == "SINGLE_LOOP") {
+        this.setMusicInfo(this.currentMusic)
+      }
       // 交给音乐工具处理
-      const nextIndex = getNextSong(len, index, this.playMode, data)
+      else {
+        const nextIndex = getNextSong(tempList, this.playMode, data)
+        this.setMusicInfo(tempList[nextIndex])
+      }
       // 得到的下一首歌曲索引交给播放函数处理
-      if (index == -1 && nextIndex == -1) this.setMusicInfo(this.currentMusic)
-      else this.setMusicInfo(tempList[nextIndex])
+      // if (index == -1 && nextIndex == -1) this.setMusicInfo(this.currentMusic)
     },
     // 获取歌曲信息 准备播放
     async setMusicInfo (music, B = false) {
       if (!music) return
       let res, musicUrl, lyricList
       try {
-        res = await getSongDetails(music.id)
         musicUrl = await getSongUrl(music.id)
         lyricList = await getSongLyric(music.id)
+        res = await getSongDetails(music.id)
       } catch (error) {
         this.isPlay = false
         normalBack('warning', error)
@@ -183,6 +191,21 @@ export const musicStatus = defineStore('music', {
       }
       audio.src = musicUrl.url
       this.setPlay(B)
+    },
+    // 播放设置 前提是获取了歌曲主要信息并且本地缓存有音乐部分信息
+    setPlay (B = false) {
+      // 判断是否需要播放 如果b为true，则为播放状态下刷新页面接着播放
+      if (B) {
+        audio.currentTime = this.currentTime
+        audio.play().catch(() => {
+          this.setMusicInfo(this.currentMusic, true)
+        })
+      } else {
+        // 点击歌曲播放或者播放与当前不同歌曲时重置设置
+        audio.currentTime = 0
+        this.currentTime = 0
+        audio.play()
+      }
     },
     // 重置搜索设置
     resetSearch () {
@@ -205,8 +228,8 @@ export const musicStatus = defineStore('music', {
       }
     },
     // 触底加载
+    // 应该判断是否触底，而不是直接调用
     async loadMore () {
-      if (!this.keywords) return
       this.searchSettngs.offset += 30
       try {
         const res = await getMusicList(this.keywords, this.searchSettngs.limit, this.searchSettngs.offset)
@@ -216,37 +239,21 @@ export const musicStatus = defineStore('music', {
         normalBack('warning', error)
       }
     },
-    // 播放设置
-    setPlay (B = false) {
-      if (B) {
-        audio.currentTime = this.currentTime
-      } else {
-        audio.currentTime = 0
-        this.currentTime = 0
-      }
-      if (B) {
-        if (this.isPlay) {
-          audio.play()
-            .then(() => { this.isPlay = true })
-            .catch(() => { this.isPlay = false })
-        } else {
-          audio.pause()
-        }
-      } else {
-        audio.play()
-          .then(() => { this.isPlay = true })
-          .catch(() => { this.isPlay = false })
-      }
-    },
     // 播放控制
-    togglePlay () {
+    async togglePlay () {
+      // 如果为播放状态
       if (this.isPlay) {
         audio.pause()
         this.isPlay = false
       } else {
-        audio.play()
-          .then(() => { this.isPlay = true })
-          .catch(() => { this.isPlay = false })
+        // 暂停状态下
+        // 判断是否获取歌曲url以及用于判断本地缓存失效
+        if (this.currentMusicInfo.url)
+          this.setPlay(true)
+        // 新用户(数据不存在)
+        else {
+          normalBack('info', '暂无歌曲')
+        }
       }
     },
     // 点击歌词跳转
@@ -268,7 +275,6 @@ export const musicStatus = defineStore('music', {
       if (this.currentMusic) {
         audio.currentTime = this.currentTime
         this.isTouch = false
-        if (this.isPlay) audio.play()
       }
     },
     // 返回百分比对应的时间

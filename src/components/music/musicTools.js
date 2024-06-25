@@ -3,7 +3,10 @@
  * @Date: 2023-11-21 18:01:13
  * @Description: 音乐工具配置
  */
+import { storeToRefs } from "pinia";
 import { reqMusicList, reqSongDetail, reqSongLyric, reqSongUrl } from "../../api/reqMusic";
+import { musicStatus } from "@/store";
+
 /*
  * @Author: Matbin
  * @Date: 2023-11-17 18:35:00
@@ -49,7 +52,10 @@ const randomPlay = (index, len) => {
  * @param {boolean} isPlayNext - 是否播放下一首
  * @returns {number} - 下一首歌曲的索引
  */
-export const getNextSong = (len, index, playMode, isPlayNext) => {
+export const getNextSong = (tempList, playMode, isPlayNext) => {
+  const { currentMusicInfo } = storeToRefs(musicStatus())
+  let index = tempList.findIndex(item => item.id == currentMusicInfo.id)
+  let len = tempList.length
   let nextIndex = 0
   switch (playMode) {
     case "RANDOM":
@@ -73,9 +79,6 @@ export const getNextSong = (len, index, playMode, isPlayNext) => {
           nextIndex = 0
         }
       }
-      break
-    case "SINGLELOOP":
-      nextIndex = index
       break
   }
   return nextIndex

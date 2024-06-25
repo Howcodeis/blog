@@ -10,9 +10,13 @@ const http = axios.create({
   baseURL: '/api/',
   timeout: 10000,
   withCredentials: true,
+  headers: {
+    'Content-Type': 'application/json',
+    'X-Requested-With': 'XMLHttpRequest'
+  }
 })
 
-
+// 请求拦截
 http.interceptors.request.use(
   config => {
     nProgress.start()
@@ -23,7 +27,7 @@ http.interceptors.request.use(
     return error
   }
 )
-
+// 响应拦截
 http.interceptors.response.use(
   response => {
     if (response.status == 200) {

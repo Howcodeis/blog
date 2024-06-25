@@ -12,7 +12,9 @@ onMounted(() => {
 </script>
 
 <template>
-  <router-link :to="{ name: 'music' }">How beautiful the music is auh!</router-link>
+  <div class="absolute">
+    <router-link :to="{ name: 'music' }">How beautiful the music is auh!</router-link>
+  </div>
   <router-view>
 
   </router-view>

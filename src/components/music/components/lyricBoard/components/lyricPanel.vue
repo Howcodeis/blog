@@ -1,20 +1,19 @@
-
 <script setup>
 import { musicStatus } from '@/store';
 import { storeToRefs } from 'pinia';
-import { defineComponent, ref, watch } from 'vue'
+import { defineComponent, onMounted, onUnmounted, ref, watch } from 'vue'
 
 defineComponent({
   name: 'LyricPanel'
 })
 
 const props = defineProps({
-  isShowLyricPanel: {
+  isShowSPLyricsPanel: {
     type: Boolean,
     default: false
   }
 })
-const { currentMusicInfo, getCurrentLyricIndex, getIsShowLyricBoard } = storeToRefs(musicStatus())
+const { currentMusicInfo, getCurrentLyricIndex, getIsShowLyricsPanel } = storeToRefs(musicStatus())
 // 歌词面板
 const lyricBoard = ref(null)
 //  歌词偏移量
@@ -37,17 +36,28 @@ const handleMove = () => {
 watch(getCurrentLyricIndex, () => {
   if (isLyricMove) lyricMove()
 })
-watch([getIsShowLyricBoard, props.isShowLyricPanel], () => {
-  if (getIsShowLyricBoard.value && props.isShowLyricPanel) {
+watch([getIsShowLyricsPanel, () => props.isShowSPLyricsPanel], () => {
+  if (getIsShowLyricsPanel.value && props.isShowSPLyricsPanel) {
     setTimeout(() => {
       lyricMove()
-    }, 100);
+    }, 500);
   }
 })
 // 跳到指定歌词
 const skipLyric = (lyric) => {
   musicStatus().skipByLyric(lyric.time)
 }
+
+onUnmounted(() => {
+  clearTimeout(timer)
+})
+onMounted(() => {
+  if (getIsShowLyricsPanel.value && props.isShowSPLyricsPanel) {
+    setTimeout(() => {
+      lyricMove()
+    }, 500);
+  }
+})
 </script>
 
 <template>

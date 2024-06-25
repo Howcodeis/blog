@@ -16,6 +16,7 @@ const playChoose = (row) => {
 // 控制触底加载过于频繁
 let lastTime
 const loadMoreData = () => {
+  if (musicStatus().playList.length < musicStatus().searchSettngs.limit) return
   let nowTime = new Date().getTime()
   if (nowTime - lastTime > 4000) {
     musicStatus().loadMore()
@@ -39,23 +40,30 @@ onMounted(() => {
         <template #default="scope">
           <div class="text-gray-500 text-[16px] select-none">
             <span>
-              {{ scope.$index < 10 ? "0" + scope.$index : scope.$index }} </span>
+              {{ (scope.$index + 1) < 10 ? "0" + (scope.$index + 1) : (scope.$index + 1) }} </span>
           </div>
         </template>
       </el-table-column>
       <el-table-column label="歌曲" min-width="100">
         <template #default="scope">
+          <!-- 歌曲名称 -->
           <div class="text-style text-[16px] text-black"><span>{{ scope.row.name }}</span></div>
-          <div class="text-style text-[10px] text-gray-500"><span>{{ scope.row.artists[0].name }}</span></div>
+          <!-- 艺人名称 -->
+          <div class="cursor-pointer inline whitespace-nowrap text-ellipsis text-[10px] text-gray-500"
+            v-for="(item, index) in scope.row.artists" :key="index">
+            <span :title="item.name">{{ index === 0 ? item.name : "/" + item.name }}</span>
+          </div>
         </template>
       </el-table-column>
+      <!-- 专辑名称 -->
       <el-table-column label="专辑" min-width="100">
         <template #default="scope">
-          <div class="text-style text-[12px]">
+          <div class="text-style text-[12px]" :title="scope.row.album.name">
             <span>{{ scope.row.album.name }}</span>
           </div>
         </template>
       </el-table-column>
+      <!-- 歌曲时长 -->
       <el-table-column label="时长">
         <template #default="scope">
           {{ timeFormat(scope.row.duration / 1000) }}
@@ -66,6 +74,6 @@ onMounted(() => {
 </template>
 <style scoped>
 .text-style {
-  @apply text-ellipsis whitespace-nowrap overflow-hidden
+  @apply text-ellipsis whitespace-nowrap overflow-hidden cursor-pointer
 }
 </style>

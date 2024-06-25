@@ -1,5 +1,5 @@
 <script setup>
-import { defineComponent, onMounted, provide, ref } from 'vue';
+import { defineComponent, nextTick, onMounted, provide, ref, watch } from 'vue';
 import controls from './components/controls.vue';
 import musicDisplay from './components/musicDisplay/musicDisplay.vue'
 import siderMenu from './components/musicDisplay/components/siderMenu.vue';
@@ -7,13 +7,13 @@ import soloPage from './components/lyricBoard/soloPage.vue';
 import gsap from 'gsap';
 import { musicStatus } from '@/store';
 import { storeToRefs } from 'pinia';
-
-const { isShowLyricBoard } = storeToRefs(musicStatus())
+import { normalBack } from '../../utils/MessageBack';
 
 defineComponent({
   name: 'MusicPage'
 })
 
+const { isShowLyricsPanel, currentMusicInfo } = storeToRefs(musicStatus())
 const isShowSiderMenu = ref(false)
 const showSiderMenu = () => {
   isShowSiderMenu.value = !isShowSiderMenu.value
@@ -43,47 +43,37 @@ const leave = (el, done) => {
     onComplete: done
   })
 }
+
 const soloItem = ref(null)
-const timeline = gsap.timeline()
+// 歌词面板调用函数
 const toggleLyricBoard = () => {
-  if (!isShowLyricBoard.value) {
-    timeline.to(musicBox.value, {
-      duration: 0.5,
-      autoAlpha: 0,
-      y: 100,
-      onComplete: () => {
-        isShowLyricBoard.value = true
-      }
-    })
-    timeline.set(soloItem.value, {
-      autoAlpha: 0,
-      y: 100,
-    })
-    timeline.to(soloItem.value, {
-      duration: 0.5,
-      autoAlpha: 1,
-      y: 0,
+  if (currentMusicInfo.value.cover == null) {
+    normalBack('info', '当前没有播放的歌曲')
+    return
+  }
+  if (!isShowLyricsPanel.value) {
+    isShowLyricsPanel.value = true
+    nextTick(() => {
+      gsap.set(soloItem.value, {
+        y: 1000,
+      })
+      gsap.to(soloItem.value, {
+        duration: 0.75,
+        y: 0,
+      })
     })
   } else {
-    timeline.to(soloItem.value, {
-      duration: 0.5,
-      autoAlpha: 0,
-      y: 100,
+    gsap.to(soloItem.value, {
+      duration: 0.75,
+      y: 1000,
       onComplete: () => {
-        isShowLyricBoard.value = false
+        isShowLyricsPanel.value = false
       }
-    })
-    timeline.set(musicBox.value, {
-      autoAlpha: 0,
-      y: 100,
-    })
-    timeline.to(musicBox.value, {
-      duration: 0.5,
-      autoAlpha: 1,
-      y: 0,
     })
   }
 }
+
+// 函数挂载时处理函数
 onMounted(() => {
   gsap.from(musicBox.value, {
     delay: 0.2,
@@ -97,27 +87,45 @@ onMounted(() => {
 </script>
 
 <template>
-  <!-- 整个音乐界面 -->
-  <div v-show="!isShowLyricBoard" ref="musicBox" class="flex box-border absolute w-full h-full bottom-0 right-0">
-    <!-- 音乐展示界面 -->
-    <div
-      class='text-white relative rounded-l w-[10%] h-full max-md:hidden max-lg:w-[15%] bg-gradient-to-t from-slate-900 via-slate-800 to-cyan-800'>
-      <siderMenu />
-    </div>
-    <div class="relative w-[90%] h-full rounded-r flex flex-col max-lg:w-[85%] max-md:w-full ">
-      <!-- 音乐列表 -->
-      <div class='relative rounded-lg w-full h-[90%] max-md:w-full'>
-        <musicDisplay />
+  <!-- 整个音乐界面 包括空白 -->
+  <div ref="musicBox"
+    class="flex box-border absolute w-full h-full min-h-[40rem] justify-center items-center max-md:items-end">
+    <!-- 音乐展示界面 不包括空白-->
+    <div ref="musicPanel"
+      class="box-border absolute min-h-[660px] duration-300 overflow-hidden rounded-[20px] w-2/3 h-2/3 flex max-md:w-full max-md:h-[80%] max-xl:w-[80%] max-w-[1200px]">
+      <!--列表展示侧栏部分 上半部分 -->
+      <div class="absolute w-full h-[90%] bg-white flex">
+        <!-- 侧栏 -->
+        <div
+          class='text-white relative w-[10%] max-sm:hidden max-lg:w-[15%] bg-gradient-to-t from-slate-900 via-slate-800 to-cyan-800'>
+          <siderMenu />
+        </div>
+        <!-- 音乐列表以及搜索 -->
+        <div class="relative w-[90%] flex flex-col max-lg:w-[85%] max-md:w-full ">
+          <musicDisplay />
+        </div>
       </div>
-      <!-- 控制栏 -->
-      <div
-        class="relative text-white bg-slate-900 z-20 select-none rounded-md h-[10%] flex justify-between min-h-[7.2rem] w-full max-md:h-[10%]">
-        <controls :toggleLyricBoard="toggleLyricBoard" />
+      <!--控件部分 下半部分 -->
+      <div class="absolute w-full h-[10%] bottom-0 flex">
+        <!-- 控键 -->
+        <div class="relative bottom-0 flex w-full h-full text-white bg-slate-900 select-none ">
+          <controls :toggleLyricBoard="toggleLyricBoard" />
+        </div>
+      </div>
+      <!-- 主奏页面 -->
+      <div ref="soloItem" v-if="isShowLyricsPanel" class="box-border absolute w-full h-full z-10 bg-cyan-300">
+        <!-- 切换按钮 -->
+        <div @click="toggleLyricBoard"
+          class='absolute top-0 left-0 w-9 h-9 text-center z-10 text-slate-300 leading-8 hover:translate-y-2 duration-500'>
+          <i class="iconfont icon-xiangxiajiantou " />
+        </div>
+        <soloPage></soloPage>
       </div>
     </div>
   </div>
+
   <!-- 这是小屏幕菜单显示 -->
-  <transition @before-enter="beforeEnter" @enter="enter" @leave="leave">
+  <!-- <transition @before-enter="beforeEnter" @enter="enter" @leave="leave">
     <div
       class="md:hidden box-border absolute w-full h-full bottom-0 right-0 before:h-full before:absolute before:w-full before:content-[''] before:backdrop-blur-[1px] before:left-0 before:top-0 overflow-hidden"
       v-show="isShowSiderMenu">
@@ -129,16 +137,7 @@ onMounted(() => {
       </div>
       <div class="absolute right-0 top-0 w-[70%] h-full" @click="showSiderMenu"></div>
     </div>
-  </transition>
-  <!-- 主奏页面 -->
-  <div ref="soloItem" class="absolute w-full h-full bottom-0" v-show="isShowLyricBoard">
-    <!-- 切换按钮 -->
-    <div @click="toggleLyricBoard"
-      class='absolute top-0 left-0 w-9 h-9 text-center text-slate-300 leading-8 z-20 hover:translate-y-2 duration-500'>
-      <i class="iconfont icon-xiangxiajiantou " />
-    </div>
-    <soloPage></soloPage>
-  </div>
+  </transition> -->
 </template>
 
 <style scoped>
