@@ -9,10 +9,10 @@ defineComponent({
 </script>
 
 <template>
-  <div class='relative w-full flex items-center h-[10%] right-0 min-h-[3.125rem] z-10 bg-slate-900'>
+  <div class='relative border-b-2 w-full flex items-center h-[10%] right-0 min-h-[3.125rem] z-10'>
     <searchBar></searchBar>
   </div>
-  <div class='relative h-[90%] bg-slate-800'>
+  <div class='relative h-[90%] bg-[#CCCCCC]'>
     <!-- 播放列表路由 -->
     <router-view></router-view>
   </div>

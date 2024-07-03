@@ -16,19 +16,19 @@ const { playList, foundMusic, home } = toRefs(titles)
 
 <template>
   <ul class="flex flex-col items-center justify-start h-full text-center leading-10 overflow-scroll">
-    <li class="li-style hover:bg-cyan-800 mt-8">
+    <li class="li-style">
       <routeComp :title="playList" />
     </li>
-    <li class="li-style hover:bg-cyan-800">
+    <li class="li-style">
       <routeComp :title="foundMusic" />
     </li>
-    <li class="li-style hover:bg-cyan-800">
+    <li class="li-style">
       <routeComp :title="home" />
     </li>
-    <li class="li-style hover:bg-cyan-800">
+    <li class="li-style">
       <routeComp />
     </li>
-    <li class="li-style hover:bg-cyan-800">
+    <li class="li-style">
       <routeComp />
     </li>
   </ul>
@@ -36,6 +36,6 @@ const { playList, foundMusic, home } = toRefs(titles)
 
 <style scoped>
 .li-style {
-  @apply w-full mb-2
+  @apply w-full mb-2 hover:bg-[#6699FF] hover:text-[#FFFFFF]
 }
 </style>

@@ -22,9 +22,7 @@ defineProps({
   <!-- 歌曲图片信息 -->
   <div class="flex justify-evenly items-center min-w-[12rem]">
     <!-- 图片 -->
-    <div
-      class="relative left-1 rounded-full overflow-hidden flex h-[3.6rem] w-[3.6rem] max-sm:h-[3.5rem] max-sm:w-[3.5rem]"
-      @click="toggleLyricBoard">
+    <div class="relative left-1 rounded-full overflow-hidden flex w-[5rem] max-sm:w-[5rem]" @click="toggleLyricBoard">
       <img class=" min-w-full min-h-full cursor-pointer" :src="currentMusicInfo.cover || '默认图片路劲'">
     </div>
     <!-- 歌手 -->
@@ -93,18 +91,18 @@ defineProps({
 
 <style scoped>
 :deep(.el-slider__bar) {
-  background: rgb(92, 230, 92);
+  background: #0099FF;
 }
 
 :deep(.el-slider__button) {
   width: 6px;
   height: 6px;
   border: 0;
-  background: rgb(38, 62, 0);
+  background: #6699FF;
 }
 
 :deep(.el-slider):hover .el-slider__button {
-  background: green;
+  background: #0099FF;
 }
 
 .iconfont {

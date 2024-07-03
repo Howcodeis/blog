@@ -7,7 +7,7 @@ import { onMounted, onUnmounted, ref, watch } from 'vue';
 import { PLAYMODEL } from '../../musicTools';
 import lyricPanel from './components/lyricPanel.vue'
 
-const { currentMusicInfo, getCurrentLyricIndex, getIsplay, getCurrentTime, volume, playMode, isShowSPLyricsPanel } = storeToRefs(musicStatus())
+const { currentMusicInfo, getCurrentLyricIndex, getIsplay, getCurrentTime, getIsTouch, volume, playMode, isShowSPLyricsPanel } = storeToRefs(musicStatus())
 // 获取下个歌词出现时间
 const nextLyricTime = () => currentMusicInfo.value.lyric[getCurrentLyricIndex?.value + 1]?.time
 // 获取当前歌词
@@ -21,15 +21,18 @@ const timeline = gsap.timeline()
 watch(getCurrentLyricIndex, () => {
   if (!getIsplay.value) {
     timeline.pause()
-  } else {
+  }
+  else {
     timeline.clear()
     gsapTimeline(timeline, lyricItem.value, disTime())
   }
 })
 // 监听播放状态暂停播放gsap动画
 watch(getIsplay, () => {
-  if (!getIsplay.value) timeline.pause()
-  else timeline.play()
+  if (getIsplay.value)
+    timeline.play()
+  else
+    timeline.pause()
 })
 // 切换动画
 const PicAndLyrics = ref(null)
@@ -167,22 +170,22 @@ onUnmounted(() => {
 }
 
 :deep(.el-slider__bar) {
-  background: rgb(92, 230, 92);
+  background: #6699FF;
 }
 
 :deep(.el-slider__button) {
-  width: 10px;
-  height: 10px;
+  width: 6px;
+  height: 6px;
   border: 0px;
-  background: rgb(38, 62, 0);
+  background: #0099FF;
 }
 
 :deep(.el-slider):hover .el-slider__button {
-  background: green;
+  background: #0099FF;
 }
 
 .iconfont {
-  @apply text-2xl hover:text-green-500 duration-500 hover:scale-125 md:text-3xl
+  @apply text-2xl duration-500 md:text-3xl
 }
 
 .btn-controls {

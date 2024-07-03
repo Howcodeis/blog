@@ -92,23 +92,22 @@ onMounted(() => {
     class="flex box-border absolute w-full h-full min-h-[40rem] justify-center items-center max-md:items-end">
     <!-- 音乐展示界面 不包括空白-->
     <div ref="musicPanel"
-      class="box-border absolute min-h-[660px] duration-300 overflow-hidden rounded-[20px] w-2/3 h-2/3 flex max-md:w-full max-md:h-[80%] max-xl:w-[80%] max-w-[1200px]">
+      class="box-border border-2 absolute min-h-[660px] duration-300 overflow-hidden rounded-[20px] w-2/3 h-2/3 flex max-md:w-full max-md:h-[80%] max-xl:w-[80%] max-w-[1200px]">
       <!--列表展示侧栏部分 上半部分 -->
       <div class="absolute w-full h-[90%] bg-white flex">
         <!-- 侧栏 -->
-        <div
-          class='text-white relative w-[10%] max-sm:hidden max-lg:w-[15%] bg-gradient-to-t from-slate-900 via-slate-800 to-cyan-800'>
+        <div class='bg-[#FFFFFF] relative w-[10%] max-sm:hidden max-lg:w-[15%]'>
           <siderMenu />
         </div>
         <!-- 音乐列表以及搜索 -->
-        <div class="relative w-[90%] flex flex-col max-lg:w-[85%] max-md:w-full ">
+        <div class="relative border-l-2 w-[90%] flex flex-col max-lg:w-[85%] max-md:w-full bg-[#FFFFFF]">
           <musicDisplay />
         </div>
       </div>
       <!--控件部分 下半部分 -->
-      <div class="absolute w-full h-[10%] bottom-0 flex">
+      <div class="absolute w-full h-[10%] border-t-2 text-[#000000] bottom-0 flex">
         <!-- 控键 -->
-        <div class="relative bottom-0 flex w-full h-full text-white bg-slate-900 select-none ">
+        <div class="relative bottom-0 flex w-full h-full select-none ">
           <controls :toggleLyricBoard="toggleLyricBoard" />
         </div>
       </div>
@@ -147,10 +146,10 @@ onMounted(() => {
 }
 
 .iconfont {
-  @apply text-3xl cursor-pointer hover:text-blue-600 duration-300
+  @apply text-3xl cursor-pointer hover:text-[#0099FF] duration-300
 }
 
 .sider {
-  @apply text-white w-[30%] bg-slate-900 relative
+  @apply text-white w-[30%] bg-[#333366] relative
 }
 </style>

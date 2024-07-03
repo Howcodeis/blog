@@ -96,6 +96,9 @@ export const musicStatus = defineStore('music', {
     getIsShowSPLyricsPanel () {
       return this.isShowSPLyricsPanel
     },
+    getIsTouch () {
+      return this.isTouch
+    },
     getCurrentMusicInfo () {
       return this.currentMusicInfo
     },

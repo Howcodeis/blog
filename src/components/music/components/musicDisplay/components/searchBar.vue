@@ -22,12 +22,13 @@ const showSiderMenu = inject('showSiderMenu')
   <div
     class="put absolute md:left-5 max-md:right-3 w-[30%] max-w-[14.375rem] max-md:w-[45%] border-gray-400 flex items-center rounded border-[.125rem]">
     <div class="relative w-[84%] h-full">
-      <input type="text" class="border-0 w-full outline-none text-blue-200 bg-transparent p-1 text-sm" v-model="keyword"
-        :placeholder="[keywords.length ? keywords : '搜索歌曲']" @keydown.native.enter="musicStatus().setMusicList(keyword)">
+      <input type="text" class="border-0 w-full outline-none text-[#000000] bg-[#CCCCCC] bg-opacity-50 p-1 text-sm"
+        v-model="keyword" :placeholder="[keywords.length ? keywords : '搜索歌曲']"
+        @keydown.native.enter="musicStatus().setMusicList(keyword)">
     </div>
-    <div class="absolute right-0 w-[16%] flex justify-center">
+    <div class="absolute right-0 w-[16%] flex justify-center bg-[#CCCCCC] opacity-50">
       <button @click="musicStatus().setMusicList(keyword)">
-        <i class="iconfont icon-sousuo text-gray-500"></i>
+        <i class="iconfont icon-sousuo select-none"></i>
       </button>
     </div>
   </div>
@@ -35,11 +36,11 @@ const showSiderMenu = inject('showSiderMenu')
 
 <style scoped>
 .iconfont {
-  @apply text-2xl hover:text-blue-700 duration-500;
+  @apply text-2xl hover:text-[#0099FF] duration-500;
 }
 
 .put:has(input:focus) {
   transition: .3s;
-  border-color: rgb(43, 43, 253);
+  border-color: #0099FF;
 }
 </style>
