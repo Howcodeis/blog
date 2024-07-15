@@ -2,7 +2,7 @@
 import { musicStatus } from '@/store';
 import { storeToRefs } from 'pinia';
 import { timeFormat } from '../musicTools';
-import { defineComponent, ref } from 'vue';
+import { defineComponent, ref, computed } from 'vue';
 import { PLAYMODEL } from '../musicTools';
 import { isString } from 'lodash';
 
@@ -16,27 +16,33 @@ const isShowVolume = ref(false)
 defineProps({
   toggleLyricBoard: Function
 })
+
+const smallMusicCover = computed(() => {
+  return currentMusicInfo.value.cover || '/src/assets/image/babies-cats.jpg'
+})
 </script>
 
 <template>
   <!-- 歌曲图片信息 -->
-  <div class="flex justify-evenly items-center min-w-[12rem]">
+  <div class="flex justify-evenly items-center w-[30%] min-w-[30%]">
     <!-- 图片 -->
-    <div class="relative left-1 rounded-full overflow-hidden flex w-[5rem] max-sm:w-[5rem]" @click="toggleLyricBoard">
-      <img class=" min-w-full min-h-full cursor-pointer" :src="currentMusicInfo.cover || '默认图片路劲'">
+    <div class="relative overflow-hidden left-1 rounded-2xl max-w-[4rem] min-w-[4rem] max-h-[4rem] min-h-[4rem]"
+      @click="toggleLyricBoard">
+      <img class=" cursor-pointer" :src="smallMusicCover">
     </div>
-    <!-- 歌手 -->
-    <div class="relative left-3 overflow-hidden max-md:text-[0.8rem]">
+    <!-- 歌曲歌手 -->
+    <div class="relative w-[55%] left-4 max-md:text-[0.8rem] text-[#ffffff]">
       <div class="text-ellipsis whitespace-nowrap overflow-x-hidden" :title="currentMusicInfo.name">
         <span>{{ currentMusic.name || '暂无歌曲' }}</span>
       </div>
       <div class="text-ellipsis whitespace-nowrap overflow-x-hidden" :title="currentMusicInfo.artist">
-        <span>{{ currentMusicInfo.artist || '暂无歌手' }}</span>
+        <span v-for="(item, index) in currentMusicInfo.artists" class="cursor-pointer">{{ index === 0 ? item.name : "/"
+          + item.name || '暂无歌手' }}</span>
       </div>
     </div>
   </div>
   <!-- 控制栏 -->
-  <div class="flex justify-center flex-col w-full">
+  <div class="flex justify-center flex-col w-[70%] min-w-[70%]">
     <!-- 播放顺序 和音量-->
     <div class="flex flex-[1] justify-center max-md:flex-[3]">
       <div class="flex items-center relative">
@@ -70,10 +76,10 @@ defineProps({
     <div class="flex justify-center items-center flex-1">
       <!-- 进度条 -->
       <div class="w-full flex justify-center items-center">
-        <div class="max-md:text-xs  flex-1 text-right"><span>{{ timeFormat(currentTime) }}</span></div>
+        <div class="max-md:text-xs text-white flex-1 text-right"><span>{{ timeFormat(currentTime) }}</span></div>
         <el-slider class="mx-2 flex-[5]" v-model="musicStatus().audioSchedule" size="small" :show-tooltip="false"
           @change="musicStatus().setProgressDone" @input="musicStatus().setProgress" />
-        <div class="max-md:text-xs flex-1 "><span>{{ isString(timeFormat(duration)) ? timeFormat(duration) :
+        <div class="max-md:text-xs text-white flex-1 "><span>{{ isString(timeFormat(duration)) ? timeFormat(duration) :
           "00:00" }}</span></div>
       </div>
     </div>
@@ -81,7 +87,7 @@ defineProps({
     <div class="flex-[2] max-md:flex-[2] flex justify-center items-start">
       <div ref="maxWidth"
         class="h-full leading-4 w-full text-center max-md:leading-5 max-md:h-full text-ellipsis whitespace-nowrap overflow-hidden">
-        <span class="word text-[0.8rem]  max-md:text-[0.6rem]">
+        <span class="word text-[0.8rem] text-white max-md:text-[0.6rem]">
           {{ lyric()?.word ? lyric()?.word : '\xa0' }}
         </span>
       </div>
@@ -106,7 +112,7 @@ defineProps({
 }
 
 .iconfont {
-  @apply text-xl h-6 duration-300 ease-in-out cursor-pointer mx-[0.4rem]
+  @apply text-xl text-[#ffffff] h-6 duration-300 ease-in-out cursor-pointer mx-[0.4rem]
 }
 
 /* .iconfont:hover, */

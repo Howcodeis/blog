@@ -20,13 +20,13 @@ const showSiderMenu = inject('showSiderMenu')
     <i class="iconfont icon-caidan1  hover:rotate-180" @click="showSiderMenu"></i>
   </div>
   <div
-    class="put absolute md:left-5 max-md:right-3 w-[30%] max-w-[14.375rem] max-md:w-[45%] border-gray-400 flex items-center rounded border-[.125rem]">
+    class="put absolute md:left-5 max-md:right-3 w-[30%] max-w-[14.375rem] max-md:w-[45%] border-[#999999] flex items-center rounded border-[.125rem]">
     <div class="relative w-[84%] h-full">
-      <input type="text" class="border-0 w-full outline-none text-[#000000] bg-[#CCCCCC] bg-opacity-50 p-1 text-sm"
+      <input type="text" class="border-0 w-full outline-none text-[#FFFFFF] bg-opacity-50 p-1 text-sm bg-transparent"
         v-model="keyword" :placeholder="[keywords.length ? keywords : '搜索歌曲']"
         @keydown.native.enter="musicStatus().setMusicList(keyword)">
     </div>
-    <div class="absolute right-0 w-[16%] flex justify-center bg-[#CCCCCC] opacity-50">
+    <div class="absolute right-0 w-[16%] flex justify-center">
       <button @click="musicStatus().setMusicList(keyword)">
         <i class="iconfont icon-sousuo select-none"></i>
       </button>
@@ -36,7 +36,7 @@ const showSiderMenu = inject('showSiderMenu')
 
 <style scoped>
 .iconfont {
-  @apply text-2xl hover:text-[#0099FF] duration-500;
+  @apply text-2xl hover:text-[#0099FF] duration-500 text-[#999999];
 }
 
 .put:has(input:focus) {

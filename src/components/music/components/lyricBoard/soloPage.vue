@@ -2,12 +2,13 @@
 import { storeToRefs } from 'pinia';
 import { musicStatus } from '@/store';
 import gsap from "gsap";
-import { gsapTimeline } from '@/utils/gsapTools'
+import { lyricsTimeline, picTimeline, animateToHidden, animateToVisible } from '@/utils/gsapTools'
 import { onMounted, onUnmounted, ref, watch } from 'vue';
 import { PLAYMODEL } from '../../musicTools';
 import lyricPanel from './components/lyricPanel.vue'
+import { normalBack } from '../../../../utils/MessageBack';
 
-const { currentMusicInfo, getCurrentLyricIndex, getIsplay, getCurrentTime, getIsTouch, volume, playMode, isShowSPLyricsPanel } = storeToRefs(musicStatus())
+const { currentMusicInfo, getCurrentLyricIndex, getIsplay, getCurrentTime, volume, playMode, isShowLyricsPanel } = storeToRefs(musicStatus())
 // 获取下个歌词出现时间
 const nextLyricTime = () => currentMusicInfo.value.lyric[getCurrentLyricIndex?.value + 1]?.time
 // 获取当前歌词
@@ -16,61 +17,54 @@ const lyric = () => currentMusicInfo.value.lyric[getCurrentLyricIndex?.value]
 const disTime = () => Math.floor((nextLyricTime() - Math.floor(getCurrentTime.value)) * 10) / 10
 // 监听歌词淡入淡出动画
 const lyricItem = ref(null)
-const timeline = gsap.timeline()
+const lyricAnimation = gsap.timeline()
+// 创建pic的旋转动画
+const picItem = ref(null)
+const picAnimation = gsap.timeline()
 // 监听歌词状态暂停播放gsap动画
 watch(getCurrentLyricIndex, () => {
+  // console.log(disTime());
   if (!getIsplay.value) {
-    timeline.pause()
+    lyricAnimation.pause()
   }
   else {
-    timeline.clear()
-    gsapTimeline(timeline, lyricItem.value, disTime())
+    lyricAnimation.clear()
+    lyricsTimeline(lyricAnimation, lyricItem.value, disTime())
   }
 })
 // 监听播放状态暂停播放gsap动画
 watch(getIsplay, () => {
-  if (getIsplay.value)
-    timeline.play()
-  else
-    timeline.pause()
+  if (getIsplay.value) {
+    lyricAnimation.play()
+  }
+  else {
+    lyricAnimation.pause()
+  }
 })
 // 切换动画
 const PicAndLyrics = ref(null)
 const lyc = ref(null)
 const toggleLyricBoardStyle = () => {
-  if (!isShowSPLyricsPanel.value) {
-    gsap.to(PicAndLyrics.value, {
-      duration: 0.5,
-      opacity: 0,
-      ease: 'power1.out',
-      onComplete: () => {
-        isShowSPLyricsPanel.value = !isShowSPLyricsPanel.value
-        gsap.fromTo(lyc.value, {
-          opacity: 0,
-        }, {
-          duration: 1,
-          opacity: 1,
-          ease: 'power1.in',
-        })
-      }
+  // 检查边界条件
+  if (!PicAndLyrics.value || !lyc.value) {
+    console.error("Toggle Lyric Board: Essential values are undefined.");
+    return normalBack('warn', "歌词面板切换失败,请检查资源获取是否正常!");
+  }
+  // 使用闭包来避免潜在的竞态条件
+  // (function () {
+  const shouldShow = !isShowLyricsPanel.value;
+  if (shouldShow) {
+    animateToHidden(PicAndLyrics.value, 1.2, () => {
+      isShowLyricsPanel.value = shouldShow;
+      animateToVisible(lyc.value, 0.5)
     })
   } else {
-    gsap.to(lyc.value, {
-      duration: 0.5,
-      opacity: 0,
-      ease: 'power1.out',
-      onComplete: () => {
-        isShowSPLyricsPanel.value = !isShowSPLyricsPanel.value
-        gsap.fromTo(PicAndLyrics.value, {
-          opacity: 0,
-        }, {
-          duration: 1,
-          opacity: 1,
-          ease: 'power1.in'
-        })
-      }
+    animateToHidden(lyc.value, 0.5, () => {
+      isShowLyricsPanel.value = shouldShow;
+      animateToVisible(PicAndLyrics.value, 1.2)
     })
   }
+  // })()
 }
 const container = ref(null)
 onMounted(() => {
@@ -82,43 +76,55 @@ onMounted(() => {
   })
 })
 onUnmounted(() => {
-  timeline.clear()
+  lyricAnimation.clear()
 })
 </script>
 
 <template>
   <!-- 背景隔离 -->
-  <div class="box overflow-hidden">
+  <div class="box overflow-hidden bg-transparent">
     <!-- 图片模糊衬底 -->
-    <div class="absolute w-full h-full overflow-hidden ">
-      <img class="scale-[1.8] brightness-[0.40] blur-[10px] w-full h-full object-cover"
-        :src="currentMusicInfo.cover || '默认图片路劲'">
+    <div class="absolute w-full h-full overflow-hidden">
     </div>
     <div ref="container" class="box overflow-scroll flex flex-col">
-      <!-- 图片和歌词 -->
-      <div ref="PicAndLyrics" class="relative w-full h-[85%] flex-col flex-center" v-show="!isShowSPLyricsPanel">
+      <!-- 歌词 -->
+      <div ref="PicAndLyrics" class="relative w-full h-[85%] flex-col flex-center" v-show="!isShowLyricsPanel">
         <!-- 图片 -->
-        <div class="relative pt-6 w-full h-[80%] flex-center">
-          <div ref="pic"
-            class="w-[80%] max-w-[22rem] max-sm:max-h-[20rem] max-sm:max-w-[20rem] max-h-[22rem] h-auto m-auto select-none duration-300 border-2 border-gray-600 overflow-hidden rounded-full flex-center"
-            @click="toggleLyricBoardStyle">
-            <img class="w-full h-auto cursor-pointer" :src="currentMusicInfo.cover || '默认图片路劲'">
+        <!-- <div class="relative pt-6 w-full h-[80%] flex-center">
+          <div ref="picItem"
+            class="w-[80%] max-w-[22rem] max-sm:max-h-[20rem] max-sm:max-w-[20rem] max-h-[22rem] h-auto m-auto select-none duration-300 border-2 border-gray-600 overflow-hidden rounded-full flex-center">
+            <img class="w-full h-auto cursor-pointer scale-150" :src="currentMusicInfo.cover || '默认图片路劲'">
+          </div>
+        </div> -->
+        <!-- 歌手以及歌词 -->
+        <div class="w-full h-[80%] flex items-center max-xl:flex-col" @click="toggleLyricBoardStyle">
+          <!-- 歌手 -->
+          <div class="w-full h-[20%] flex-center flex-1">
+            <div class="w-full h-[60%] text-center">
+              <span class=" text-slate-300 text-2xl block">{{ currentMusicInfo.name || '暂无歌曲' }}</span>
+              <span class="text-slate-300 text-sm" v-for="(item, index) in currentMusicInfo.artists">{{ index === 0 ?
+                item.name :
+                "/" + item.name || '暂无歌手'
+                }}</span>
+            </div>
+          </div>
+          <!-- 歌词 -->
+          <div class="relative w-full h-[20%] flex-center flex-[3]">
+            <div class="absolute w-full h-[60%] flex-center">
+              <span ref="lyricItem"
+                class="max-md:text-base w-[80%] text-xl text-center text-slate-300 select-none lyric">{{
+                  lyric()?.word
+                }}</span>
+            </div>
           </div>
         </div>
-        <!-- 歌词 -->
-        <div class="relative w-full h-[20%] flex-center">
-          <div class="absolute w-full h-[60%] flex-center">
-            <span ref="lyricItem"
-              class="max-md:text-base w-[80%] text-xl text-center text-slate-300 select-none lyric">{{
-                lyric()?.word
-              }}</span>
-          </div>
-        </div>
+        <!-- 歌手 -->
+
       </div>
       <!-- 歌词轮播 -->
-      <div ref="lyc" class="select-none relative w-full h-[85%] flex-center flex-col pb-4" v-show="isShowSPLyricsPanel"
+      <div ref="lyc" class="select-none relative w-full h-[85%] flex-center flex-col pb-4" v-show="isShowLyricsPanel"
         @click="toggleLyricBoardStyle">
-        <lyricPanel :isShowSPLyricsPanel="isShowSPLyricsPanel"></lyricPanel>
+        <lyricPanel :isShowLyricsPanel="isShowLyricsPanel"></lyricPanel>
       </div>
       <!-- 进度条 -->
       <div class="relative w-full h-[1%] overflow-hidden flex items-center">
@@ -198,7 +204,6 @@ onUnmounted(() => {
 
 .lyric {
   font-weight: 550;
-  font-style: oblique;
 }
 
 .volume-set {

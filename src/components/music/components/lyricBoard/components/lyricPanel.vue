@@ -8,12 +8,12 @@ defineComponent({
 })
 
 const props = defineProps({
-  isShowSPLyricsPanel: {
+  isShowLyricsPanel: {
     type: Boolean,
     default: false
   }
 })
-const { currentMusicInfo, getCurrentLyricIndex, getIsShowLyricsPanel } = storeToRefs(musicStatus())
+const { currentMusicInfo, getCurrentLyricIndex, getIsShowSPLyricsPanel } = storeToRefs(musicStatus())
 // 歌词面板
 const lyricBoard = ref(null)
 //  歌词偏移量
@@ -36,8 +36,8 @@ const handleMove = () => {
 watch(getCurrentLyricIndex, () => {
   if (isLyricMove) lyricMove()
 })
-watch([getIsShowLyricsPanel, () => props.isShowSPLyricsPanel], () => {
-  if (getIsShowLyricsPanel.value && props.isShowSPLyricsPanel) {
+watch([getIsShowSPLyricsPanel, () => props.isShowLyricsPanel], () => {
+  if (getIsShowSPLyricsPanel.value && props.isShowLyricsPanel) {
     setTimeout(() => {
       lyricMove()
     }, 500);
@@ -52,7 +52,7 @@ onUnmounted(() => {
   clearTimeout(timer)
 })
 onMounted(() => {
-  if (getIsShowLyricsPanel.value && props.isShowSPLyricsPanel) {
+  if (getIsShowSPLyricsPanel.value && props.isShowLyricsPanel) {
     setTimeout(() => {
       lyricMove()
     }, 500);
@@ -65,7 +65,9 @@ onMounted(() => {
   <div class="relative w-full h-[20%] md:w-[70%] flex justify-center">
     <div class="absolute bottom-0 w-[80%] h-[60%] min-h-[3.125rem] text-center">
       <span class="text-xl text-slate-300">{{ currentMusicInfo.name }}</span><br>
-      <span class="text-sm text-slate-400">{{ currentMusicInfo.artist }}</span>
+      <span v-for="(item, index) in currentMusicInfo.artists" class="text-sm text-slate-400">{{ index === 0 ? item.name
+        : "/" + item.name
+        }}</span>
     </div>
   </div>
   <!-- 歌词部分 -->

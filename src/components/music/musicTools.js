@@ -6,6 +6,7 @@
 import { storeToRefs } from "pinia";
 import { reqMusicList, reqSongDetail, reqSongLyric, reqSongUrl } from "../../api/reqMusic";
 import { musicStatus } from "@/store";
+// const { currentMusicInfo } = storeToRefs(musicStatus())
 
 /*
  * @Author: Matbin
@@ -24,7 +25,7 @@ export const PLAYTYPE = {
 /*
  * @Author: Matbin
  * @Date: 2023-11-17 18:35:00
- * @Description: 顺序播放状态值
+ * @Description: 随机播放状态值
  */
 const randomPlay = (index, len) => {
   // 如果数组长度为1，直接返回索引值
@@ -41,6 +42,32 @@ const randomPlay = (index, len) => {
     return res
   }
 }
+/*
+ * @Author: Matbin
+ * @Date: 2023-11-17 18:35:00
+ * @Description: 顺序播放状态值
+ */
+const listPlay = (index, len, isPlayNext) => {
+  let res
+  if (isPlayNext) {
+    if (index == len - 1) {
+      res = 0
+    } else if (index != -1) {
+      res = index + 1
+    } else {
+      res = 0
+    }
+  } else {
+    if (index == 0) {
+      res = len - 1
+    } else if (index != -1) {
+      res = index - 1
+    } else {
+      res = 0
+    }
+  }
+  return res
+}
 /**
  * @Author: Matbin
  * @Date: 2023-11-17 18:35:00
@@ -50,10 +77,9 @@ const randomPlay = (index, len) => {
  * @param {number} index - 当前歌曲的索引
  * @param {string} playMode - 播放模式
  * @param {boolean} isPlayNext - 是否播放下一首
- * @returns {number} - 下一首歌曲的索引
+ * @returns {number} nextIndex - 下一首歌曲的索引
  */
-export const getNextSong = (tempList, playMode, isPlayNext) => {
-  const { currentMusicInfo } = storeToRefs(musicStatus())
+export const getNextSong = (tempList, playMode, isPlayNext, currentMusicInfo) => {
   let index = tempList.findIndex(item => item.id == currentMusicInfo.id)
   let len = tempList.length
   let nextIndex = 0
@@ -62,23 +88,7 @@ export const getNextSong = (tempList, playMode, isPlayNext) => {
       nextIndex = randomPlay(index, len)
       break
     case "LISTLOOP":
-      if (isPlayNext) {
-        if (index == len - 1) {
-          nextIndex = 0
-        } else if (index != -1) {
-          nextIndex = index + 1
-        } else {
-          nextIndex = 0
-        }
-      } else {
-        if (index == 0) {
-          nextIndex = len - 1
-        } else if (index != -1) {
-          nextIndex = index - 1
-        } else {
-          nextIndex = 0
-        }
-      }
+      nextIndex = listPlay(index, len, isPlayNext)
       break
   }
   return nextIndex
@@ -178,6 +188,6 @@ export const getSongDetails = async (id) => {
  */
 export const getMusicList = async (keywords, limit, offset) => {
   const res = await reqMusicList(keywords, limit, offset)
-  if (res.code == 200) return res.result.songs
+  if (res.code == 200) return res.result
   else throw new Error("获取歌曲列表失败")
 }

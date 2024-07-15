@@ -13,7 +13,12 @@ const props = defineProps({
 </script>
 
 <template>
-  <router-link :to="{ name: props.title }">{{ props.title }}</router-link>
+  <router-link :to="{ name: title }">
+    <p>
+      {{ title }}
+    </p>
+  </router-link>
+
 </template>
 
 <style scoped></style>
