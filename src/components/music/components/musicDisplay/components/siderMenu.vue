@@ -34,6 +34,6 @@ const { playList, foundMusic, home, collection } = toRefs(titles)
 
 <style scoped>
 .li-style {
-  @apply w-full mb-2 hover:bg-[#6699FF] hover:text-[#FFFFFF] duration-200
+  @apply relative w-full mb-2 select-none
 }
 </style>

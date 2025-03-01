@@ -2,15 +2,15 @@ import gsap from "gsap";
 
 const SCALE = 100; // 定义常量，提高代码的可读性和可维护性
 
-const transTime = (val) => {
+const transTime = (time) => {
   // 使用Math.floor确保结果为整数，然后通过除以SCALE得到带有两位小数的结果
   // 这种方式在处理大数时可能会有精度损失，但保留了原始功能的要求
-  let result = Math.floor(val * SCALE) / SCALE;
+  let result = Math.floor(time * SCALE) / SCALE;
   return result;
 }
-const enterLeave = (val) => {
-  if (val < 0) return 1.2;
-  return transTime(val * 0.1);
+const enterLeave = (time) => {
+  if (time < 0 || Number.isNaN(time)) return 1.2;
+  return transTime(time * 0.1);
 }
 /**
  * 处理进入场景的逻辑。
@@ -25,23 +25,10 @@ const enter = (time) => {
 }
 // 元素展示的时间
 const delay = (time) => {
-  // 参数类型校验：确保time是一个数字
-  if (typeof time !== 'number') {
-    throw new TypeError('Expected a number for argument "time"');
-  }
-
   // 处理time小于0的情况
-  if (time < 0) {
-    return 3;
+  if (time < 0 || Number.isNaN(time)) {
+    return 10;
   }
-
-  // 处理time大于等于3的情况
-  // if (time >= 3) {
-  //   return transTime(time * 0.7);
-  // }
-
-  // 处理0 <= time < 3的情况
-
   // 处理time >= 0的情况
   return transTime(time * 0.6);
 }
@@ -58,8 +45,6 @@ export function lyricsTimeline (timeline, el, disTime = 1000) { // 默认值为1
   }
   if (typeof disTime !== 'number') {
     console.error('Invalid duration time provided.');
-    // disTime == 3; 
-    // 对disTime进行基本验证
     return;
   }
 
@@ -95,9 +80,19 @@ export function picTimeline (timeline, el, duration = 60000) {
     ease: "linear",
   })
 }
+/**
+ * 使用GSAP库动画化目标元素，使其透明度变为0并按指定比例缩放，最终隐藏元素。
+ * 此函数专为实现元素的平滑隐藏效果而设计。
+ * 
+ * @param {HTMLElement} target - 需要进行动画处理的目标元素。
+ * @param {number} toScale - 元素最终的缩放比例，用于控制元素隐藏时的大小变化。
+ * @param {Function} onComplete - 动画完成时调用的回调函数，可用于执行隐藏后的其他操作。
+ */
 export function animateToHidden (target, toScale, onComplete) {
+  // 使用GSAP的gsap.to方法创建动画，将目标元素的透明度变为0，缩放比例变为toScale，动画持续0.2秒
+  // 动画完成后执行onComplete函数
   gsap.to(target, {
-    opacity: 0,
+    autoAlpha: 0,
     duration: 0.2,
     scale: toScale,
     onComplete: onComplete
@@ -107,10 +102,48 @@ export function animateToHidden (target, toScale, onComplete) {
 export function animateToVisible (target, fromScale) {
   gsap.fromTo(target, {
     scale: fromScale,
-    opacity: 0,
+    autoAlpha: 0,
   }, {
     scale: 1,
     duration: 0.2,
-    opacity: 1,
+    autoAlpha: 1,
   });
+}
+
+/**
+ * 动画隐藏面板函数
+ * 使用GSAP库进行动画处理，将目标元素隐藏起来。
+ * 
+ * @param {HTMLElement} target - 需要进行隐藏动画的元素。
+ * @param {number} y - 元素隐藏后的垂直偏移量，用于动画效果。
+ * @param {Function} onComplete - 动画完成后的回调函数。
+ */
+export function animatePanelHide (target, y, onComplete) {
+  // 使用GSAP的to方法来创建一个动画，将目标元素向下移动并逐渐透明化
+  gsap.to(target, {
+    y: y,
+    autoAlpha: 0,
+    duration: 0.2,
+    onComplete: onComplete
+  })
+}
+
+/**
+ * 使用GSAP库动画化面板显示
+ * 
+ * 该函数利用GSAP的fromTo方法来创建一个从起始位置到结束位置的动画效果，同时伴随透明度的变化，用于动画化显示面板或其他DOM元素。
+ * 
+ * @param {HTMLElement} target - 需要进行动画化的DOM元素目标。
+ * @param {number} startToY - 动画开始时元素的y轴位置。
+ * @param {number} endToY - 动画结束时元素的y轴位置。
+ */
+export function animatePanelShow (target, startToY, endToY) {
+  gsap.fromTo(target, {
+    y: startToY,
+    autoAlpha: 0
+  }, {
+    y: endToY,
+    duration: 0.5,
+    autoAlpha: 1
+  })
 }

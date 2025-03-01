@@ -9,7 +9,7 @@ defineComponent({
 </script>
 
 <template>
-  <div class='relative border-b-2 border-[#99CCFF] w-full flex items-center h-[10%] right-0 min-h-[3.125rem] z-10'>
+  <div class='relative border-b-[1px] border-gradient w-full flex items-center h-[10%] right-0 min-h-[3.125rem] z-10'>
     <searchBar></searchBar>
   </div>
   <div class='relative h-[90%]'>
@@ -18,4 +18,8 @@ defineComponent({
   </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.border-gradient {
+  border-image: linear-gradient(to right, gray, white) 1;
+}
+</style>

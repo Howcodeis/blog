@@ -3,10 +3,7 @@
  * @Date: 2023-11-21 18:01:13
  * @Description: 音乐工具配置
  */
-import { storeToRefs } from "pinia";
-import { reqMusicList, reqSongDetail, reqSongLyric, reqSongUrl } from "../../api/reqMusic";
-import { musicStatus } from "@/store";
-// const { currentMusicInfo } = storeToRefs(musicStatus())
+import { reqMusicList, reqSongDetail, reqSongLyric, reqSongUrl, reqSongComment } from "../../api/reqMusic";
 
 /*
  * @Author: Matbin
@@ -22,6 +19,11 @@ export const PLAYTYPE = {
   FAVORITE: "FAVORITE", //收藏歌单
   SEARCH: "SEARCH" // 搜索歌单
 }
+
+export const getRandomComment = () => {
+  return Math.floor(Math.random() * (20 - 1) + 1)
+}
+
 /*
  * @Author: Matbin
  * @Date: 2023-11-17 18:35:00
@@ -33,13 +35,13 @@ const randomPlay = (index, len) => {
     return index
   }
   // 生成0到长度的随机整数
-  let res = Math.floor(Math.random() * (len + 1))
+  let nextIndex = Math.floor(Math.random() * len)
   // 如果生成的随机数等于原始索引值，递归调用randomPlay函数
-  if (res == index) {
+  if (nextIndex == index) {
     randomPlay(index)
   } else {
     // 否则返回随机数
-    return res
+    return nextIndex
   }
 }
 /*
@@ -48,25 +50,25 @@ const randomPlay = (index, len) => {
  * @Description: 顺序播放状态值
  */
 const listPlay = (index, len, isPlayNext) => {
-  let res
+  let nextIndex
   if (isPlayNext) {
     if (index == len - 1) {
-      res = 0
+      nextIndex = 0
     } else if (index != -1) {
-      res = index + 1
+      nextIndex = index + 1
     } else {
-      res = 0
+      nextIndex = 0
     }
   } else {
     if (index == 0) {
-      res = len - 1
+      nextIndex = len - 1
     } else if (index != -1) {
-      res = index - 1
+      nextIndex = index - 1
     } else {
-      res = 0
+      nextIndex = 0
     }
   }
-  return res
+  return nextIndex
 }
 /**
  * @Author: Matbin
@@ -77,21 +79,15 @@ const listPlay = (index, len, isPlayNext) => {
  * @param {number} index - 当前歌曲的索引
  * @param {string} playMode - 播放模式
  * @param {boolean} isPlayNext - 是否播放下一首
- * @returns {number} nextIndex - 下一首歌曲的索引
  */
 export const getNextSong = (tempList, playMode, isPlayNext, currentMusicInfo) => {
   let index = tempList.findIndex(item => item.id == currentMusicInfo.id)
   let len = tempList.length
-  let nextIndex = 0
-  switch (playMode) {
-    case "RANDOM":
-      nextIndex = randomPlay(index, len)
-      break
-    case "LISTLOOP":
-      nextIndex = listPlay(index, len, isPlayNext)
-      break
+  if (playMode === "RANDOM") {
+    return randomPlay(index, len)
+  } else {
+    return listPlay(index, len, isPlayNext)
   }
-  return nextIndex
 }
 /*
  * @Author: Matbin
@@ -149,19 +145,28 @@ export const getSongUrl = async (id) => {
 export const getSongLyric = async (id) => {
   const res = await reqSongLyric(id)
   if (res.code == 200) {
-    const LyricList = []
-    let handlerLrc = res.lrc.lyric.split('\n')
-    handlerLrc.forEach(lrc => {
-      let words = lrc.split(']'),
-        time = words[0].substring(1).split(':'),
-        Ftime = +time[0] * 60 + +time[1],
-        wordsObj = {
-          time: Math.floor(Ftime * 100) / 100,
-          word: words[1]
-        }
-      LyricList.push(wordsObj)
-    });
-    return LyricList
+    if (res.lrc.lyric.split('\n')[0].indexOf('[') == -1) {
+      const LyricList = res.lrc.lyric.split('\n').map(lrc => {
+        let words = lrc,
+          wordsObj = {
+            word: words
+          }
+        return wordsObj
+      })
+      return LyricList
+    } else {
+      const LyricList = res.lrc.lyric.split('\n').map(lrc => {
+        let words = lrc.split(']'),
+          time = words[0].substring(1).split(':'),
+          formattedTime = +time[0] * 60 + +time[1],
+          wordsObj = {
+            time: Math.floor(formattedTime * 100) / 100,
+            word: words[1],
+          };
+        return wordsObj
+      })
+      return LyricList
+    }
   }
   else throw new Error("获取歌词失败")
 }
@@ -191,3 +196,10 @@ export const getMusicList = async (keywords, limit, offset) => {
   if (res.code == 200) return res.result
   else throw new Error("获取歌曲列表失败")
 }
+
+export const getSongComment = async (id) => {
+  const res = await reqSongComment(id)
+  if (res.code == 200) return res.comments
+  else throw new Error("获取歌曲评论失败")
+}
+

@@ -48,3 +48,19 @@ export const reqSongDetail = async id => {
   const url = `/song/detail?ids=${id}`;
   return await http.get(url)
 }
+
+/**
+ * 异步请求歌曲评论数据
+ * 
+ * 该函数通过HTTP GET请求获取指定歌曲ID的评论数据。
+ * 使用者需要提供歌曲的ID，函数将拼接请求URL并发送请求。
+ * 
+ * @param {number} id - 歌曲的ID，用于构建请求URL，识别特定歌曲的评论。
+ * @returns {Promise} 返回一个Promise对象，解析后的结果为HTTP请求的响应数据。
+ */
+export const reqSongComment = async id => {
+  // 构建请求URL，包含歌曲ID
+  const url = `/comment/music?id=${id}`;
+  // 发送GET请求获取歌曲评论数据
+  return await http.get(url)
+}

@@ -2,25 +2,25 @@
 import { storeToRefs } from 'pinia';
 import { musicStatus } from '@/store';
 import gsap from "gsap";
-import { lyricsTimeline, picTimeline, animateToHidden, animateToVisible } from '@/utils/gsapTools'
+import { lyricsTimeline, animateToHidden, animateToVisible } from '@/utils/gsapTools'
 import { onMounted, onUnmounted, ref, watch } from 'vue';
-import { PLAYMODEL } from '../../musicTools';
+import { PLAYMODEL, getRandomComment } from '../../musicTools';
 import lyricPanel from './components/lyricPanel.vue'
 import { normalBack } from '../../../../utils/MessageBack';
 
+// 将store值响应化
 const { currentMusicInfo, getCurrentLyricIndex, getIsplay, getCurrentTime, volume, playMode, isShowLyricsPanel } = storeToRefs(musicStatus())
 // 获取下个歌词出现时间
 const nextLyricTime = () => currentMusicInfo.value.lyric[getCurrentLyricIndex?.value + 1]?.time
 // 获取当前歌词
 const lyric = () => currentMusicInfo.value.lyric[getCurrentLyricIndex?.value]
+
 // 上下歌词时间差 保留小数点后两位
 const disTime = () => Math.floor((nextLyricTime() - Math.floor(getCurrentTime.value)) * 10) / 10
+
 // 监听歌词淡入淡出动画
 const lyricItem = ref(null)
 const lyricAnimation = gsap.timeline()
-// 创建pic的旋转动画
-const picItem = ref(null)
-const picAnimation = gsap.timeline()
 // 监听歌词状态暂停播放gsap动画
 watch(getCurrentLyricIndex, () => {
   // console.log(disTime());
@@ -32,15 +32,29 @@ watch(getCurrentLyricIndex, () => {
     lyricsTimeline(lyricAnimation, lyricItem.value, disTime())
   }
 })
+// const commentItem = ref(null)
+// let commentIndex = ref(getRandomComment()),
+//   timer
+
 // 监听播放状态暂停播放gsap动画
 watch(getIsplay, () => {
   if (getIsplay.value) {
     lyricAnimation.play()
+    // timer = setInterval(() => {
+    //   commentIndex = ref(getRandomComment())
+    // }, 15000)
   }
   else {
     lyricAnimation.pause()
+    // clearInterval(timer)
   }
-})
+}, { immediate: true })
+
+// watch(commentIndex, (newValue, oldValue) => {
+//   console.log("111", newValue, oldValue);
+
+// }, { immediate: true })
+
 // 切换动画
 const PicAndLyrics = ref(null)
 const lyc = ref(null)
@@ -70,9 +84,9 @@ const container = ref(null)
 onMounted(() => {
   gsap.from(container.value.children, {
     duration: 0.75,
-    stagger: 0.2,
+    stagger: 0.25,
     autoAlpha: 0,
-    y: 100,
+    y: 30,
   })
 })
 onUnmounted(() => {
@@ -87,21 +101,22 @@ onUnmounted(() => {
     <div class="absolute w-full h-full overflow-hidden">
     </div>
     <div ref="container" class="box overflow-scroll flex flex-col">
-      <!-- 歌词 -->
-      <div ref="PicAndLyrics" class="relative w-full h-[85%] flex-col flex-center" v-show="!isShowLyricsPanel">
+      <!-- 歌词特殊界面 -->
+      <div ref="PicAndLyrics" class="relative w-full h-[85%] max-md:flex-col flex-row flex-center"
+        v-show="!isShowLyricsPanel">
         <!-- 图片 -->
-        <!-- <div class="relative pt-6 w-full h-[80%] flex-center">
-          <div ref="picItem"
-            class="w-[80%] max-w-[22rem] max-sm:max-h-[20rem] max-sm:max-w-[20rem] max-h-[22rem] h-auto m-auto select-none duration-300 border-2 border-gray-600 overflow-hidden rounded-full flex-center">
-            <img class="w-full h-auto cursor-pointer scale-150" :src="currentMusicInfo.cover || '默认图片路劲'">
+        <div class="pt-6 w-full h-[80%] flex-center">
+          <div @click="toggleLyricBoardStyle"
+            class="w-[65%] max-w-[22rem] overflow-hidden select-none duration-300 border-2 border-gray-600 rounded-[25px]">
+            <img class="cursor-pointer object-cover" :src="currentMusicInfo.cover || '默认图片路劲'">
           </div>
-        </div> -->
+        </div>
         <!-- 歌手以及歌词 -->
-        <div class="w-full h-[80%] flex items-center max-xl:flex-col" @click="toggleLyricBoardStyle">
+        <div class="w-full h-[60%] flex justify-around flex-col">
           <!-- 歌手 -->
-          <div class="w-full h-[20%] flex-center flex-1">
+          <div class="w-full h-[30%] flex-center">
             <div class="w-full h-[60%] text-center">
-              <span class=" text-slate-300 text-2xl block">{{ currentMusicInfo.name || '暂无歌曲' }}</span>
+              <span class=" text-slate-300 text-xl block">{{ currentMusicInfo.name || '暂无歌曲' }}</span>
               <span class="text-slate-300 text-sm" v-for="(item, index) in currentMusicInfo.artists">{{ index === 0 ?
                 item.name :
                 "/" + item.name || '暂无歌手'
@@ -109,16 +124,23 @@ onUnmounted(() => {
             </div>
           </div>
           <!-- 歌词 -->
-          <div class="relative w-full h-[20%] flex-center flex-[3]">
-            <div class="absolute w-full h-[60%] flex-center">
+          <div class="w-full h-[40%] flex-center">
+            <div class="w-full h-[80%] flex-center">
               <span ref="lyricItem"
-                class="max-md:text-base w-[80%] text-xl text-center text-slate-300 select-none lyric">{{
-                  lyric()?.word
-                }}</span>
+                class="text-center max-md:text-base w-full bg-white text-transparent bg-clip-text text-xl select-none lyric">{{
+                  lyric()?.word }}
+              </span>
             </div>
           </div>
+          <!-- 评论 -->
+          <!-- <div class=" w-full h-[30%] relative bottom-4 flex items-center justify-center overflow-hidden">
+            <div class="w-full h-[100%]">
+              <span ref="commentItem" class="text-white text-[0.8rem] text-center block leading-6">
+                {{ currentMusicInfo.comments[commentIndex]?.content }}
+                <span class="block">- {{ currentMusicInfo.comments[commentIndex]?.user.nickname }} -</span></span>
+            </div>
+          </div> -->
         </div>
-        <!-- 歌手 -->
 
       </div>
       <!-- 歌词轮播 -->
@@ -127,19 +149,19 @@ onUnmounted(() => {
         <lyricPanel :isShowLyricsPanel="isShowLyricsPanel"></lyricPanel>
       </div>
       <!-- 进度条 -->
-      <div class="relative w-full h-[1%] overflow-hidden flex items-center">
-        <el-slider class="absolute" v-model="musicStatus().audioSchedule" size="small" :show-tooltip="false"
+      <div id="audioSchedule" class="relative w-full h-[1%] overflow-visible flex items-center">
+        <el-slider class="absolute" v-model="currentMusicInfo.audioSchedule" size="small" :show-tooltip="false"
           @change="musicStatus().setProgressDone" @input="musicStatus().setProgress" />
       </div>
       <!-- 控件 -->
       <div class="relative w-full h-[14%] select-none">
         <div class="absolute w-full h-[50%] top-6 flex-center text-slate-300">
-          <i class="iconfont icon-zuobofang btn-controls" @click="musicStatus().playNext(false)" title="上一首"> </i>
+          <i class="iconfont icon-zuobofang btn-controls" @click="musicStatus().playNext()" title="上一首"> </i>
           <div class="bg-gray-900 bg-opacity-50 w-10 h-10 flex-center border-2 rounded-full">
-            <i class="iconfont icon-tingzhi btn-controls" @click="musicStatus().togglePlay" v-show="getIsplay"
+            <i class="iconfont icon-tingzhi btn-controls" @click="musicStatus().togglePlay()" v-show="getIsplay"
               title="暂停"></i>
-            <i class="iconfont icon-bofang btn-controls pl-[5px]" @click="musicStatus().togglePlay" v-show="!getIsplay"
-              title="播放"></i>
+            <i class="iconfont icon-bofang btn-controls pl-[5px]" @click="musicStatus().togglePlay()"
+              v-show="!getIsplay" title="播放"></i>
           </div>
           <i class="iconfont icon-youbofang btn-controls" @click="musicStatus().playNext(true)" title="下一首"> </i>
         </div>
@@ -179,6 +201,14 @@ onUnmounted(() => {
   background: #6699FF;
 }
 
+:deep(#audioSchedule .el-slider__runway) {
+  background: transparent;
+}
+
+:deep(.el-progress--line) {
+  width: 100%;
+}
+
 :deep(.el-slider__button) {
   width: 6px;
   height: 6px;
@@ -187,6 +217,8 @@ onUnmounted(() => {
 }
 
 :deep(.el-slider):hover .el-slider__button {
+  width: 10px;
+  height: 10px;
   background: #0099FF;
 }
 

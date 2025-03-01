@@ -40,7 +40,6 @@ const showSiderMenu = inject('showSiderMenu')
 }
 
 .put:has(input:focus) {
-  transition: .3s;
-  border-color: #0099FF;
+  transition: 2s all;
 }
 </style>

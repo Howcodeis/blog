@@ -51,8 +51,10 @@ const router = createRouter({
   history: createWebHistory(),
   routes
 })
+// 防止列表渲染数据过多导致性能问题
 router.beforeEach((to, from) => {
   if (to.name == "playList") {
+    // 列表数据大于60条，那么重新进入列表就会重新搜索并重置偏移量
     if (musicStatus().playList.length > 60) {
       nextTick(() => {
         const { keywords } = storeToRefs(musicStatus())

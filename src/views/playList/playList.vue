@@ -108,7 +108,7 @@ onMounted(() => {
 }
 
 ::v-deep(.el-table__body .el-table__row.hover-row td) {
-  background-color: #6699FF;
+  background-color: #777b83;
 }
 
 ::v-deep(.el-table__inner-wrapper::before) {

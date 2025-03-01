@@ -75,7 +75,7 @@ onMounted(() => {
     <!-- 文字在模糊背景下滚动导致背景失真，出现块状问题 添加will-change-scroll 解决 -->
     <ul ref="lyricBoard" class="overflow-y-scroll pt-[10rem] pb-[12rem] w-[80%] h-full will-change-scroll"
       @wheel="handleMove" @touchmove="handleMove">
-      <li class="cursor-pointer leading-2 my-4 text-center text-slate-400 duration-300 will-change-transform"
+      <li class="cursor-pointer leading-2 my-4 text-center text-slate-400 duration-1000 will-change-transform"
         :class="[index == getCurrentLyricIndex ? 'active' : '']" v-for="(lyric, index) in currentMusicInfo.lyric"
         :key="index" @click.stop="skipLyric(lyric)">
         {{ lyric.word }}</li>
