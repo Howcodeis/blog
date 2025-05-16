@@ -185,9 +185,9 @@ export const musicStatus = defineStore('music', {
         ]);
 
         // 检查返回结果是否满足预期，增强边界条件处理
-        if (!details || !details[0] || !details[0].al || !details[0].al.picUrl || !songUrl.url) {
-          throw new Error("未能获取到歌曲的详细信息或封面URL");
-        }
+        // if (!details || !details[0] || !details[0].al || !details[0].al.picUrl || !songUrl.url) {
+        //   throw new Error("未能获取到歌曲的详细信息或封面URL");
+        // }
 
         this.currentMusic = music;
         this.currentMusicInfo = {

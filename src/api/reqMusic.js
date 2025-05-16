@@ -23,7 +23,7 @@ export const reqMusicList = async (keywords, limit, offset) => {
  * @returns music-url
  */
 export const reqSongUrl = async id => {
-  const url = `/song/url/v1?id=${id}&level=exhigh`;
+  const url = `/song/url?id=${id}&level=exhigh`;
   return await http.get(url);
 };
 

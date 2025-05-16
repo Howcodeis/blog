@@ -120,7 +120,7 @@ onUnmounted(() => {
               <span class="text-slate-300 text-sm" v-for="(item, index) in currentMusicInfo.artists">{{ index === 0 ?
                 item.name :
                 "/" + item.name || '暂无歌手'
-                }}</span>
+              }}</span>
             </div>
           </div>
           <!-- 歌词 -->
@@ -238,9 +238,9 @@ onUnmounted(() => {
   font-weight: 550;
 }
 
-.volume-set {
+/* .volume-set {
   writing-mode: sideways-rl
-}
+} */
 
 .flex-center {
   @apply flex justify-center items-center

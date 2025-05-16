@@ -77,12 +77,12 @@ const smallMusicCover = computed(() => {
       <!-- 进度条 -->
       <div class="w-full flex justify-center items-center">
         <div class="max-md:text-xs text-white flex-1 text-right"><span>{{ timeFormat(currentMusicInfo.currentTime)
-            }}</span></div>
+        }}</span></div>
         <el-slider class="mx-2 flex-[5]" v-model="currentMusicInfo.audioSchedule" size="small" :show-tooltip="false"
           @change="musicStatus().setProgressDone" @input="musicStatus().setProgress" />
         <div class="max-md:text-xs text-white flex-1 "><span>{{ isNaN(currentMusicInfo.duration) ?
           "00:00" : timeFormat(currentMusicInfo.duration)
-            }}</span></div>
+        }}</span></div>
       </div>
     </div>
     <!-- 迷你歌词 -->
